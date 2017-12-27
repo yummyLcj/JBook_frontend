@@ -1,3 +1,7 @@
+#wepy
+dist
+.wepycache
+
 # Logs
 logs
 *.log
