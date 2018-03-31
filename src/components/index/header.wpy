@@ -1,0 +1,68 @@
+<!--
+@Author: chenjie.lu
+@Date:   2018-03-04T14:29:26+08:00
+@Email:  chenjie.lu@husor.com
+@Last modified by:   chenjie.lu
+@Last modified time: 2018-03-04T14:36:48+08:00
+-->
+<style lang="less">
+  .index-header {
+      // height: 200rpx;
+      border-top: 1rpx solid transparent;
+      line-height: 1;
+      background-color: #48D1CC;
+      font-size: 28rpx;
+      color: #FFF;
+      text-align: center;
+      .total-view {
+        margin: 40rpx 0;
+        .total-count {
+          font-size: 56rpx;
+        }
+      }
+      .part-view {
+        margin: 40rpx 0;
+        display: inline-block;
+        width: 50%;
+        .total-count {
+          font-size: 36rpx;
+        }
+      }
+      .total-count {
+        margin-bottom: 10rpx;
+      }
+  }
+</style>
+<template>
+  <view class="index-header">
+    <view class="total-view">
+      <view class="total-count">{{countData.totalCount}}</view>
+      <view>{{countData.date}}月结余</view>
+    </view>
+    <view class="part-view">
+      <view class="total-count">{{countData.totalInCome}}</view>
+      <view>{{countData.date}}月收入</view>
+    </view>
+    <view class="part-view">
+      <view class="total-count">{{countData.totalSpending}}</view>
+      <view>{{countData.date}}月支出</view>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+
+  export default class Header extends wepy.component {
+    props = {
+      countData: {
+        type: Object,
+        default: {
+          totalCount: 0,
+          totalInCome: 0,
+          totalSpending: 0,
+          date: 1
+        }
+      }
+    }
+  }
+</script>
