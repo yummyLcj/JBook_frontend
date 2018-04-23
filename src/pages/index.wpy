@@ -1,18 +1,24 @@
 <template>
   <view>
     <header :countData.sync="countData"></header>
-    <bills></bills>
+    <repeat for="{{billsData}}" key="index" index="index" item="item">
+        <bills :billsData.sync="item"></bills>
+    </repeat>
+    <addRecordBtn :selectedAccount.sync="selectedAccount"></addRecordBtn>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import Header from '../components/index/header'
-  import Bills from '../components/index/bills'
+  import request from 'src/common/js/ajax'
+  import Header from 'components/index/header'
+  import Bills from 'components/index/bills'
+  import AddRecordBtn from 'components/index/addRecordBtn'
   export default class Index extends wepy.page {
     components = {
       header: Header,
-      bills: Bills
+      bills: Bills,
+      addRecordBtn: AddRecordBtn
     }
     data = {
       countData: {
@@ -20,10 +26,26 @@
         totalInCome: 0,
         totalSpending: 0,
         date: 1
-      }
+      },
+      accountsData: [],
+      selectedAccount: {},
+      billsData: []
     }
     onLoad() {
-      this.$parent.login()
+      request({
+        url: `/accounts/${this.$parent.userInfo.uid}`
+      })
+      .then((res) => {
+        this.accountsData = res.data.data
+        const selectedAccount = this.selectedAccount = res.data.data.find((item) => item.isDefault)
+        request({
+          url: `/records/${selectedAccount.aid}`
+        })
+        .then((res) => {
+          this.billsData = res.data.data
+          this.$apply()
+        })
+      })
     }
   }
 </script>

@@ -1,0 +1,70 @@
+<style lang="less">
+  .tag-container {
+    flex: 1;
+    overflow-y: scroll;
+  }
+  .tag {
+    margin-bottom: 30rpx;
+    width: 150rpx;
+    vertical-align: top;
+    display: inline-block;
+    text-align: center;
+    .tag-icon {
+      margin: 15rpx 0;
+      display: inline-block;
+      width: 70rpx;
+      height: 70rpx;
+      line-height: 70rpx;
+      font-size: 55rpx;
+      text-align: center;
+      color: #FFF;
+      background-color:#FF9900;
+      border-radius: 100%;
+    }
+    .tag-name {
+      font-size: 20rpx;
+      color: #CCC;
+    }
+  }
+</style>
+
+<template>
+<view class="tag-container">
+  <repeat for="{{tags}}">
+    <view class="tag" @tap="changeType" data-index="{{index}}">
+      <view class="iconfont tag-icon">&#xe615;</view>
+      <view class="tag-name">{{item.name}}</view>
+    </view>
+  </repeat>
+</view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Tags extends wepy.component {
+  props = {
+    tags: {
+      type: Array,
+      default: [{
+        typeId: 1,
+        icon: '&#xe615;',
+        name: '吃喝1'
+      }, {
+        typeId: 12,
+        icon: '&#xe615;',
+        name: '吃喝2'
+      }, {
+        typeId: 13,
+        icon: '&#xe615;',
+        name: '吃喝3'
+      }]
+    }
+  }
+
+  methods = {
+    changeType(e) {
+      this.$emit('changeSelectedType', this.tags[e.currentTarget.dataset.index])
+    }
+  }
+}
+</script>

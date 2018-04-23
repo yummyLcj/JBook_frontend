@@ -1,0 +1,152 @@
+<style lang="less">
+  .keyboard {
+    flex: 1;
+    background-color: #666;
+    color: #FFF;
+  }
+  .key {
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  .number {
+    display: inline-block;
+    vertical-align: top;
+    width: 562.5rpx;
+    height: 100%;
+    .key {
+      display: inline-flex;
+      vertical-align: top;
+      width: 33.3%;
+      height: 25%;
+      font-size: 36rpx;
+      &:nth-child(3n+2) {
+        border-left: 1rpx solid rgba(255, 255, 255, .2);
+        border-right: 1rpx solid rgba(255, 255, 255, .2);
+        border-bottom: 1rpx solid rgba(255, 255, 255, .2);
+      }
+      &:not(:nth-child(3n+2)) {
+        border-bottom: 1rpx solid rgba(255, 255, 255, .2);
+      }
+    }
+  }
+  .function {
+    display: inline-block;
+    vertical-align: top;
+    height: 100%;
+    width: 187.5rpx;
+    .key {
+      display: flex;
+      height: 50%;
+      font-size: 40rpx;
+      border-bottom: 1rpx solid rgba(255, 255, 255, .2);
+      border-left: 1rpx solid rgba(255, 255, 255, .2);
+    }
+    .ensure {
+      color: #FF9900;
+    }
+  }
+</style>
+
+<template>
+  <view class="keyboard" @tap.stop="changeAmount">
+    <view class="number">
+      <view class="key" data-key="7">7</view>
+      <view class="key" data-key="8">8</view>
+      <view class="key" data-key="9">9</view>
+      <view class="key" data-key="4">4</view>
+      <view class="key" data-key="5">5</view>
+      <view class="key" data-key="6">6</view>
+      <view class="key" data-key="1">1</view>
+      <view class="key" data-key="2">2</view>
+      <view class="key" data-key="3">3</view>
+      <view class="key" data-key="clear">清空</view>
+      <view class="key" data-key=".">.</view>
+      <view class="key" data-key="0">0</view>
+    </view>
+    <view class="function">
+      <view class="key" data-key="-1">删除</view>
+      <view class="key ensure" data-key="enter">确认</view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Keyboard extends wepy.component {
+  props = {
+    record: {
+      type: Object,
+      twoWay: true
+    }
+  }
+
+  methods = {
+    changeAmount(e) {
+      const key = e.target.dataset.key
+      let amount = this.record.amount
+      switch (key) {
+        case '0':
+          amount += '0'
+          if (amount === 0) {
+            amount += '.'
+          }
+          break
+        case '1':
+          amount += '1'
+          break
+        case '2':
+          amount += '2'
+          break
+        case '3':
+          amount += '3'
+          break
+        case '4':
+          amount += '4'
+          break
+        case '5':
+          amount += '5'
+          break
+        case '6':
+          amount += '6'
+          break
+        case '7':
+          amount += '7'
+          break
+        case '8':
+          amount += '8'
+          break
+        case '9':
+          amount += '9'
+          break
+        case '.':
+          if (amount.indexOf('.') < '0') {
+            if (amount === '') {
+              amount += '0.'
+            } else {
+              amount += '.'
+            }
+          }
+          break
+        case '-1':
+          amount = amount.slice(0, -1)
+          break
+        case 'clear':
+          amount = ''
+          break
+        case 'enter':
+          this.$emit('saveRecord')
+          return
+        default:
+          break
+      }
+      if (amount.replace(/.*\./, '').length > 2) {
+        return
+      }
+      this.record = Object.assign(this.record, {
+        amount
+      })
+    }
+  }
+}
+</script>

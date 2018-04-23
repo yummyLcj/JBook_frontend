@@ -1,0 +1,44 @@
+/*
+ * @Author: chenjie.lu
+ * @Date: 2018-04-22 13:16:15
+ * @Last Modified by: chenjie.lu
+ * @Last Modified time: 2018-04-22 16:02:45
+ */
+<style lang="less">
+  .addBillBtn {
+    position: fixed;
+    bottom: 50rpx;
+    left: 325rpx;
+    width: 100rpx;
+    height: 100rpx;
+    line-height: 100rpx;
+    color: #FFF;
+    border-radius: 100rpx;
+    background-color: #FFCE40;
+  }
+</style>
+
+<template>
+  <button class="iconfont addBillBtn J_addBillBen" @tap="addRecord">&#xe81a;</button>
+</template>
+
+
+<script>
+  import wepy from 'wepy'
+  export default class AddRecordBtn extends wepy.component {
+    props = {
+      selectedAccount: {
+        type: Object,
+        Default: {}
+      }
+    }
+
+    methods = {
+      addRecord(e) {
+        wepy.navigateTo({
+          url: `addRecord?aid=${this.selectedAccount.aid}`
+        })
+      }
+    }
+  }
+</script>

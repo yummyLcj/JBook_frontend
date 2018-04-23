@@ -1,0 +1,150 @@
+/*
+ * @Author: chenjie.lu
+ * @Date: 2018-04-22 15:08:38
+ * @Last Modified by: chenjie.lu
+ * @Last Modified time: 2018-04-22 18:19:09
+ */
+<style lang="less">
+  .full-page {
+    display: flex;
+    flex-direction: column;
+  }
+  .header {
+    width: 750rpx;
+    height: 200rpx;
+    border-bottom: 1rpx solid #CCC;
+    .balance-type-selectors {
+      box-sizing: border-box;
+      padding: 25rpx 0;
+      height: 100rpx;
+      text-align: center;
+      button {
+        line-height: 50rpx;
+        color: #FF9900;
+        border-radius: 0;
+        border: 1rpx solid #FF9900;
+      }
+      .selected {
+        color: #FFF;
+        background-color: #FF9900;
+      }
+    }
+    .simple-info-display {
+      padding: 0 24rpx;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100rpx;
+      .selected-type {
+        float: left;
+        .selected-type-icon {
+          margin: 15rpx 0;
+          display: inline-block;
+          width: 70rpx;
+          height: 70rpx;
+          line-height: 70rpx;
+          font-size: 55rpx;
+          text-align: center;
+          color: #FFF;
+          background-color:#FF9900;
+          border-radius: 100%;
+        }
+        .selected-type-name {
+          margin-left: 24rpx;
+          display: inline-block;
+          vertical-align: top;
+          line-height: 100rpx;
+          font-size: 30rpx;
+        }
+      }
+      .amount {
+        overflow: hidden;
+        line-height: 100rpx;
+        font-size: 40rpx;
+        text-align: right;
+        &.empty {
+          color: #CCC;
+        }
+      }
+    }
+  }
+</style>
+
+<template>
+  <view class="full-page">
+    <view class="header">
+      <view class="balance-type-selectors">
+          <button size="mini" plain class="{{record.type === '1' ? 'selected' : ''}}" @tap="changeBalanceTyoe" data-type="1">支出</button>
+          <button size="mini" plain class="{{record.type === '2' ? 'selected': ''}}" @tap="changeBalanceTyoe"  data-type="2">收入</button>
+      </view>
+      <view class="simple-info-display">
+        <view class="selected-type">
+          <view class="iconfont selected-type-icon">&#xe615;</view>
+          <view class="selected-type-name">{{selectedType.name}}</view>
+        </view>
+        <view class="amount {{record.amount === '' ? 'empty' : ''}}">{{record.amount || '0.00'}}</view>
+      </view>
+    </view>
+    <tags></tags>
+    <keyboard :record.sync="record"></keyboard>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import request from 'src/common/js/ajax'
+import Tags from 'components/addRecord/tags'
+import Keyboard from 'components/addRecord/keyboard'
+
+export default class AddRecord extends wepy.page {
+  components = {
+    tags: Tags,
+    keyboard: Keyboard
+  }
+
+  data = {
+    record: {
+      type: '1',
+      balanceType: 1,
+      amount: '',
+      note: ''
+    },
+    selectedType: {
+      typeId: 1,
+      icon: '&#xe615;',
+      name: '吃喝'
+    },
+    aid: '0'
+  }
+
+  onLoad(params) {
+    this.aid = params.aid
+  }
+
+  methods = {
+    changeBalanceTyoe(e) {
+      const record = this.record
+      record.type = e.target.dataset.type.toString()
+      this.record = record
+    }
+  }
+
+  events = {
+    'changeSelectedType': (selectedType) => {
+      this.selectedType = selectedType
+    },
+    'saveRecord': () => {
+      request({
+        url: `/record/${this.aid}`,
+        method: 'post',
+        data: {
+          amount: this.record.amount,
+          balanceType: this.record.balanceType,
+          type: this.selectedType.typeId,
+          note: '123123'
+        }
+      })
+    }
+  }
+}
+
+</script>

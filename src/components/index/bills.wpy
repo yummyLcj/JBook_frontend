@@ -88,17 +88,12 @@
       billsData: {
         type: Object,
         default: {
-          timeStamp: 1520145062963,
+          timeStamp: 0,
           bills: [{
-            type: '其他1',
-            tips: '服务器1',
-            userName: '晨杰1',
-            cost: 9.1
-          }, {
-            type: '其他2',
-            tips: '服务器2',
-            userName: '晨杰2',
-            cost: 9.2
+            type: '0',
+            tips: '0',
+            userName: '0',
+            cost: 0
           }]
         }
       }

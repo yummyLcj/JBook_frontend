@@ -1,25 +1,37 @@
 <style lang="less">
   @font-face {
     font-family: 'iconfont';  /* project id 570343 */
-    src: url('//at.alicdn.com/t/font_570343_sinbryywm6fj38fr.eot');
-    src: url('//at.alicdn.com/t/font_570343_sinbryywm6fj38fr.eot?#iefix') format('embedded-opentype'),
-    url('//at.alicdn.com/t/font_570343_sinbryywm6fj38fr.woff') format('woff'),
-    url('//at.alicdn.com/t/font_570343_sinbryywm6fj38fr.ttf') format('truetype'),
-    url('//at.alicdn.com/t/font_570343_sinbryywm6fj38fr.svg#iconfont') format('svg');
+    src: url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.eot');
+    src: url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.eot?#iefix') format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.woff') format('woff'),
+    url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.svg#iconfont') format('svg');
   }
   .iconfont {
     font-family: 'iconfont';
+  }
+  page {
+    font-size: 0;
+  }
+  .full-page {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
   }
 </style>
 
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
+import login from 'src/common/js/login'
 
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index'
+      'pages/index',
+      'pages/addRecord'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -29,6 +41,16 @@ export default class extends wepy.app {
     }
   }
 
+  userInfo = {
+
+  }
+
+  onLaunch() {
+    login((uid) => {
+      this.userInfo.uid = uid
+    })
+  }
+
   globalData = {
     userInfo: null
   }
@@ -36,80 +58,6 @@ export default class extends wepy.app {
   constructor () {
     super()
     this.use('requestfix')
-  }
-
-  getUserInfo(sessionKey) {
-    const that = this
-    const getUserInfo = () => {
-      wepy.getUserInfo({
-        withCredentials: true,
-        success (res) {
-          this.register({
-            sessionKey,
-            encryptedData: res.encryptedData,
-            iv: res.iv
-          })
-          that.globalData.userInfo = res.userInfo
-        }
-      })
-    }
-    wepy.getSetting({
-      success(res) {
-        if (!res.authSetting['scope.userInfo']) {
-          wepy.authorize({
-            scope: 'scope.userInfo',
-            success: getUserInfo
-          })
-        } else {
-          getUserInfo()
-        }
-      }
-    })
-  }
-
-  login(cb) {
-    wepy.login({
-      success (res) {
-        this.request({
-          url: '/session',
-          method: 'post',
-          data: {
-            code: res.code
-          },
-          success(res) {
-            wepy.setStorage({
-              key: 'uid',
-              data: res.data.uid
-            })
-            if (res.data.needLogin) {
-              this.getUserInfo(res.data.sessionKey)
-            }
-          }
-        })
-        cb && cb(res)
-      }
-    })
-  }
-
-  register(options) {
-    console.log(options)
-    this.request({
-      url: '/user',
-      data: options,
-      method: 'post',
-      success(res) {
-        console.log(res)
-      }
-    })
-  }
-
-  request(option) {
-    const options = typeof url === 'string' ? {
-      url: `http://127.0.0.1:3000${option}`
-    } : Object.assign(option, {
-      url: `http://127.0.0.1:3000${option.url}`
-    })
-    return wepy.request(options)
   }
 }
 </script>
