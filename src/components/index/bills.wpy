@@ -98,5 +98,9 @@
         }
       }
     }
+
+    onLoad() {
+      console.log(this.billsData)
+    }
   }
 </script>

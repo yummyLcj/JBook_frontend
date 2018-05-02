@@ -1,9 +1,9 @@
 <template>
   <view>
     <header :countData.sync="countData"></header>
-    <repeat for="{{billsData}}" key="index" index="index" item="item">
+    <block wx:for="{{billsData}}" wx:key="{{index}}">
         <bills :billsData.sync="item"></bills>
-    </repeat>
+    </block>
     <addRecordBtn :selectedAccount.sync="selectedAccount"></addRecordBtn>
   </view>
 </template>

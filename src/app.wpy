@@ -1,4 +1,5 @@
 <style lang="less">
+  @import './style/weui.less';
   @font-face {
     font-family: 'iconfont';  /* project id 570343 */
     src: url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.eot');
