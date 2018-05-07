@@ -2,7 +2,7 @@
  * @Author: chenjie.lu
  * @Date: 2018-04-22 15:08:38
  * @Last Modified by: chenjie.lu
- * @Last Modified time: 2018-05-07 14:20:54
+ * @Last Modified time: 2018-05-07 22:03:39
  */
 <style lang="less">
   .full-page {
@@ -134,7 +134,7 @@ export default class AddRecord extends wepy.page {
     },
     'saveRecord': () => {
       request({
-        url: `/record/${this.aid}`,
+        url: `/record/${wepy.getStorageSync('sessionUid')}/${this.aid}`,
         method: 'post',
         data: {
           amount: this.record.amount,

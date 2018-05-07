@@ -8,7 +8,8 @@ export default (cb) => {
         url: '/session',
         method: 'post',
         data: {
-          code: res.code
+          code: res.code,
+          name: 'testName'
         }
       })
         .then((res) => {
