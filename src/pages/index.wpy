@@ -11,6 +11,8 @@
 <script>
   import wepy from 'wepy'
   import request from 'src/common/js/ajax'
+  import checkLogin from 'src/common/js/check-login'
+  import login from 'src/common/js/login'
   import Header from 'components/index/header'
   import Bills from 'components/index/bills'
   import AddRecordBtn from 'components/index/addRecordBtn'
@@ -31,20 +33,35 @@
       selectedAccount: {},
       billsData: []
     }
-    onLoad() {
-      request({
-        url: `/accounts/${this.$parent.userInfo.uid}`
+    gettingAccounts() {
+      return request({
+        url: `/accounts/${wepy.getStorageSync('sessionUid')}`
       })
-      .then((res) => {
-        this.accountsData = res.data.data
-        const selectedAccount = this.selectedAccount = res.data.data.find((item) => item.isDefault)
-        request({
-          url: `/records/${selectedAccount.aid}`
-        })
+    }
+    gettingRecords(aid) {
+      return request({
+        url: `/records/${wepy.getStorageSync('sessionUid')}/${aid}`
+      })
+    }
+    initPage() {
+      this.gettingAccounts()
         .then((res) => {
-          this.billsData = res.data.data
-          this.$apply()
+          this.accountsData = res.data.data
+          const selectedAccount = this.selectedAccount = res.data.data.find((item) => item.isDefault)
+          this.gettingRecords(selectedAccount.aid)
+            .then((res) => {
+              this.billsData = res.data.data.data
+              this.$apply()
+            })
         })
+    }
+    onLoad() {
+      checkLogin((uid) => {
+        if (uid) {
+          this.initPage(uid)
+        } else {
+          login((uid) => this.initPage(uid))
+        }
       })
     }
   }

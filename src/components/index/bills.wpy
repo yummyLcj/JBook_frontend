@@ -89,18 +89,19 @@
         type: Object,
         default: {
           timeStamp: 0,
-          bills: [{
-            type: '0',
-            tips: '0',
-            userName: '0',
-            cost: 0
-          }]
+          bills: [
+            // {
+            //   type: '0',
+            //   tips: '0',
+            //   userName: '0',
+            //   cost: 0
+            // }
+          ]
         }
       }
     }
 
     onLoad() {
-      console.log(this.billsData)
     }
   }
 </script>

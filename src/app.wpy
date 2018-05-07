@@ -26,7 +26,6 @@
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
-import login from 'src/common/js/login'
 
 export default class extends wepy.app {
   config = {
@@ -42,19 +41,7 @@ export default class extends wepy.app {
     }
   }
 
-  userInfo = {
-
-  }
-
-  onLaunch() {
-    login((uid) => {
-      this.userInfo.uid = uid
-    })
-  }
-
-  globalData = {
-    userInfo: null
-  }
+  userInfo = {}
 
   constructor () {
     super()
