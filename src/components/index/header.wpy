@@ -11,41 +11,45 @@
       border-top: 1rpx solid transparent;
       line-height: 1;
       background-color: #48D1CC;
-      font-size: 28rpx;
       color: #FFF;
       text-align: center;
-      .total-view {
-        margin: 40rpx 0;
-        .total-count {
-          font-size: 56rpx;
-        }
-      }
+      font-size: 0;
       .part-view {
         margin: 40rpx 0;
+        width: 33.3%;
         display: inline-block;
-        width: 50%;
+        font-size: 28rpx;        
         .total-count {
           font-size: 36rpx;
+          margin-bottom: 10rpx;
         }
       }
-      .total-count {
-        margin-bottom: 10rpx;
+      .default-account {
+        display: inline-block;
+        margin-top: 24rpx;
+        padding: 8rpx 12rpx;
+        font-size: 28rpx;
+        border: 1rpx solid #FFF;
+        border-radius: 20rpx;
       }
   }
 </style>
 <template>
   <view class="index-header">
-    <view class="total-view">
-      <view class="total-count">{{countData.totalCount}}</view>
-      <view>{{countData.date}}月结余</view>
-    </view>
-    <view class="part-view">
-      <view class="total-count">{{countData.totalInCome}}</view>
-      <view>{{countData.date}}月收入</view>
-    </view>
-    <view class="part-view">
-      <view class="total-count">{{countData.totalSpending}}</view>
-      <view>{{countData.date}}月支出</view>
+    <view class="default-account">{{selectedAccount.account.accountName}}<text class="iconfont">&#xe81c;</text></view>
+    <view>
+      <view class="part-view">
+        <view class="total-count">{{countData.totalCount}}</view>
+        <view>{{countData.date}}月结余</view>
+      </view>
+      <view class="part-view">
+        <view class="total-count">{{countData.totalInCome}}</view>
+        <view>{{countData.date}}月收入</view>
+      </view>
+      <view class="part-view">
+        <view class="total-count">{{countData.totalSpending}}</view>
+        <view>{{countData.date}}月支出</view>
+      </view>
     </view>
   </view>
 </template>
@@ -62,6 +66,9 @@
           totalSpending: 0,
           date: 1
         }
+      },
+      selectedAccount: {
+        type: Object
       }
     }
   }

@@ -1,6 +1,6 @@
 <template>
   <view>
-    <header :countData.sync="countData"></header>
+    <header :countData.sync="countData" :selectedAccount.sync="selectedAccount"></header>
     <block wx:for="{{billsData}}" wx:key="{{index}}">
         <bills :billsData.sync="item"></bills>
     </block>
@@ -29,7 +29,6 @@
         totalSpending: 0,
         date: 1
       },
-      accountsData: [],
       selectedAccount: {},
       billsData: []
     }
@@ -46,7 +45,6 @@
     initPage() {
       this.gettingAccounts()
         .then((res) => {
-          this.accountsData = res.data.data
           const selectedAccount = this.selectedAccount = res.data.data.find((item) => item.isDefault)
           this.gettingRecords(selectedAccount.aid)
             .then((res) => {
@@ -55,7 +53,7 @@
             })
         })
     }
-    onLoad() {
+    onShow() {
       checkLogin((uid) => {
         if (uid) {
           this.initPage(uid)

@@ -2,11 +2,11 @@
   @import './style/weui.less';
   @font-face {
     font-family: 'iconfont';  /* project id 570343 */
-    src: url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.eot');
-    src: url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.eot?#iefix') format('embedded-opentype'),
-    url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.woff') format('woff'),
-    url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.ttf') format('truetype'),
-    url('//at.alicdn.com/t/font_570343_qi5pth0hihllq5mi.svg#iconfont') format('svg');
+    src: url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.eot');
+    src: url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.eot?#iefix') format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.woff') format('woff'),
+    url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.svg#iconfont') format('svg');
   }
   .iconfont {
     font-family: 'iconfont';
