@@ -1,6 +1,6 @@
 <style lang="less">
   @import './style/weui.less';
-  @import './font/iconfont.css';
+  @import './style/font/iconfont.less';
   @font-face {
     font-family: 'iconfont';  /* project id 570343 */
     src: url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.eot');
