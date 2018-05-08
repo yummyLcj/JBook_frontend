@@ -1,5 +1,6 @@
 <style lang="less">
   @import './style/weui.less';
+  @import './font/iconfont.css';
   @font-face {
     font-family: 'iconfont';  /* project id 570343 */
     src: url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.eot');
@@ -46,6 +47,26 @@ export default class extends wepy.app {
   constructor () {
     super()
     this.use('requestfix')
+  }
+
+  getUserInfo(cb) {
+    const that = this
+    if (this.userInfo) {
+      return this.userInfo
+    }
+    wepy.getUserInfo({
+      success (res) {
+        that.userInfo = res.userInfo
+        cb && cb(res.userInfo)
+      },
+      fail (res) {
+        that.userInfo = {
+          avatarUrl: './../img/avator.png',
+          nickName: '游客'
+        }
+        cb && cb(that.userInfo)
+      }
+    })
   }
 }
 </script>
