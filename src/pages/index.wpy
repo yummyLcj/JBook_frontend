@@ -1,66 +1,307 @@
 <template>
-  <view>
-    <header :countData.sync="countData" :selectedAccount.sync="selectedAccount"></header>
-    <block wx:for="{{billsData}}" wx:key="{{index}}">
-        <bills :billsData.sync="item"></bills>
-    </block>
-    <addRecordBtn :selectedAccount.sync="selectedAccount"></addRecordBtn>
+  <view class="container">
+    <view class="header">
+      <view class="fl"><text class="iconfont icon-total fs42"></text></view>
+      <view class="userinfo-nickname">{{ userInfo.nickName }}<text class="iconfont icon-arrow"></text></view>
+      <view class="fr">
+        <text class="iconfont icon-more"></text>
+      </view>
+      <image class="userinfo-avatar fr" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
+      <view class="title">
+        <view class="part-view">  
+          <view class="fs42">{{countData.totalCount}}</view>
+          <view>{{countData.date}} 月结余</view>
+        </view>
+      </view>
+      <view class="title">
+        <view class="part-view">  
+          <view>{{countData.totalInCome}}</view>
+          <view>{{countData.date}} 月收入</view>
+        </view>
+        <view class="part-view">
+          <view>{{countData.totalSpending}}</view>
+          <view>{{countData.date}} 月支出</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="list">
+      <repeat for="{{bills}}" item="item">
+        <view class="list-title">
+          <view class="title-left">
+            <text>{{item.date}}</text>
+            <text>{{item.week}}</text>
+          </view>
+          <view class="title-right">支出：100</view>
+        </view>
+        <view class="list-item">
+          <repeat for="{{item.list}}" item="col">
+            <view class="list-col" >
+              <view class="list-each tal"><text class="iconfont icon-{{col.icon}} {{col.icon}} each-icon"></text></view>
+              <view class="list-each tal">
+                <view class="each-title">{{col.title}}</view>
+                <view class="each-name">{{col.name}}</view>
+                <view class="each-remark">{{col.remark}}</view>
+              </view>
+              <view class="list-each tar each-total">{{col.total}}</view>
+            </view>
+          </repeat>
+        </view>
+      </repeat>
+    </view>
+
+    <button class="iconfont addBtn icon-add" @tap="addRecord"></button>
+
+    <toast />
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import request from 'src/common/js/ajax'
-  import checkLogin from 'src/common/js/check-login'
-  import login from 'src/common/js/login'
-  import Header from 'components/index/header'
-  import Bills from 'components/index/bills'
-  import AddRecordBtn from 'components/index/addRecordBtn'
+  import Panel from '@/components/panel' // alias example
+  import Counter from 'counter' // alias example
+  // import moduleA from 'module-a' // aliasFields ignore module example
+  import Toast from 'wepy-com-toast'
+  import testMixin from '../mixins/test'
+
   export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '账单'
+    }
     components = {
-      header: Header,
-      bills: Bills,
-      addRecordBtn: AddRecordBtn
+      panel: Panel,
+      counter1: Counter,
+      counter2: Counter,
+      toast: Toast
     }
+
+    mixins = [testMixin]
+
     data = {
-      countData: {
-        totalCount: 0,
-        totalInCome: 0,
-        totalSpending: 0,
-        date: 1
+      userInfo: {
+        nickName: '加载中...'
       },
-      selectedAccount: {},
-      billsData: []
-    }
-    gettingAccounts() {
-      return request({
-        url: `/accounts/${wepy.getStorageSync('sessionUid')}`
-      })
-    }
-    gettingRecords(aid) {
-      return request({
-        url: `/records/${wepy.getStorageSync('sessionUid')}/${aid}`
-      })
-    }
-    initPage() {
-      this.gettingAccounts()
-        .then((res) => {
-          const selectedAccount = this.selectedAccount = res.data.data.find((item) => item.isDefault)
-          this.gettingRecords(selectedAccount.aid)
-            .then((res) => {
-              this.billsData = res.data.data.data
-              this.$apply()
-            })
-        })
-    }
-    onShow() {
-      checkLogin((uid) => {
-        if (uid) {
-          this.initPage(uid)
-        } else {
-          login((uid) => this.initPage(uid))
+      countData: {
+        totalCount: 100,
+        totalInCome: 200,
+        totalSpending: 100,
+        date: 7
+      },
+      bills: [
+        {
+          date: '2017年05月08日',
+          week: '星期二',
+          list: [
+            {
+              icon: 'gift',
+              title: '礼物',
+              name: 'fickle',
+              remark: '生日',
+              total: 119
+            },
+            {
+              icon: 'drink',
+              title: '礼物',
+              name: 'fickle',
+              remark: '生日',
+              total: 20
+            }
+          ]
+        },
+        {
+          date: '2017年05月03日',
+          week: '星期三',
+          list: [
+            {
+              icon: 'tel',
+              title: '礼物',
+              name: 'fickle',
+              remark: '生日',
+              total: 11.9
+            },
+            {
+              icon: 'shopping',
+              title: '礼物',
+              name: 'fickle',
+              remark: '生日',
+              total: 20
+            }
+          ]
+        },
+        {
+          date: '2017年05月08日',
+          week: '星期二',
+          list: [
+            {
+              icon: 'sing',
+              title: '礼物',
+              name: 'fickle',
+              remark: '生日',
+              total: 119
+            },
+            {
+              icon: 'drink',
+              title: '礼物',
+              name: 'fickle',
+              remark: '生日',
+              total: 20
+            }
+          ]
+        },
+        {
+          date: '2017年05月03日',
+          week: '星期三',
+          list: [
+            {
+              icon: 'bus',
+              title: '礼物',
+              name: 'fickle',
+              remark: '生日',
+              total: 11.9
+            },
+            {
+              icon: 'lip',
+              title: '礼物',
+              name: 'fickle',
+              remark: '生日',
+              total: 20
+            }
+          ]
         }
+      ]
+    }
+
+    computed = {
+      now () {
+        return +new Date()
+      }
+    }
+
+    methods = {
+      toast () {
+        let promise = this.$invoke('toast', 'show', {
+          title: '自定义标题',
+          img: 'https://raw.githubusercontent.com/kiinlam/wetoast/master/images/star.png'
+        })
+
+        promise.then((d) => {
+          console.log('toast done')
+        })
+      }
+    }
+
+    // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数
+    events = {}
+
+    onLoad() {
+      let self = this
+      this.$parent.getUserInfo(function (userInfo) {
+        if (userInfo) {
+          self.userInfo = userInfo
+        }
+
+        self.$apply()
       })
     }
   }
 </script>
+
+<style lang="less">
+  .header {
+    padding: 30rpx 12rpx;
+    background-color: #48D1CC;
+    text-align: center;
+    color: #FFF;
+    .userinfo-nickname {
+      display: inline-block;
+      padding: 8rpx 12rpx;
+      font-size: 28rpx;
+      border: 1rpx solid #FFF;
+      border-radius: 20rpx;
+      margin-left:68rpx;
+    }
+    .userinfo-avatar {
+      width: 40rpx;
+      height: 40rpx;
+      border-radius: 50%;
+      margin-top: 10rpx;
+      margin-right: 30rpx;
+    }
+    .title {
+      display: flex;
+      text-align: center;
+      margin-top: 50rpx;
+      font-size: 30rpx;
+      .part-view {
+        flex: 1;
+      }
+    }
+  }
+
+  .list {
+    background-color: #efefef;
+    font-size: 30rpx;
+    .list-title {
+      display: flex;
+      padding: 10rpx 30rpx;
+      font-size: 22rpx;
+      .title-left {
+        flex: 1;
+        text {
+          margin-right: 16rpx;
+        }
+      }
+      .title-right {
+        flex: 1;
+        text-align: right;
+      }
+    }
+    .list-item {
+      background-color: #fff;
+      padding-left: 60rpx;
+      .list-col {
+        border-bottom: 1px solid #efefef;
+        display: flex;
+        padding: 16rpx 60rpx 16rpx 0;
+        align-items: center;
+        &:last-child {
+          border-bottom: none;
+        }
+        .list-each {
+          flex: 1;
+        }
+        .each-icon {
+          padding: 10rpx;
+          font-size: 40rpx;
+          color: #fff;
+          border: 1px solid #fff;
+          border-radius: 50%;
+        }
+        .each-total {
+          font-size: 42rpx;
+        }
+        .each-name, .each-remark {
+          display: inline-block;
+          margin-right: 12rpx;
+          font-size: 24rpx;
+          margin-top: 20rpx;
+        }
+        .each-remark {
+          color: #aaa;
+        }
+      }
+    }
+  }
+
+  .addBtn {
+    position: fixed;
+    bottom: 50rpx;
+    left: 325rpx;
+    width: 100rpx;
+    height: 100rpx;
+    line-height: 100rpx;
+    color: #FFF;
+    border-radius: 100rpx;
+    background-color: #FFCE40;
+  }
+</style>

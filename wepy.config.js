@@ -1,8 +1,10 @@
-const path = require('path')
-var prod = process.env.NODE_ENV === 'production'
+const path = require('path');
+var prod = process.env.NODE_ENV === 'production';
 
 module.exports = {
   wpyExt: '.wpy',
+  eslint: true,
+  cliLogs: !prod,
   build: {
     web: {
       htmlTemplate: path.join('src', 'index.template.html'),
@@ -12,19 +14,20 @@ module.exports = {
   },
   resolve: {
     alias: {
-      'src': path.join(__dirname, 'src'),
-      'components': path.join(__dirname, 'src/components')
+      counter: path.join(__dirname, 'src/components/counter'),
+      '@': path.join(__dirname, 'src'),
+      '@@': path.join(__dirname, 'src/font')
     },
+    aliasFields: ['wepy', 'weapp'],
     modules: ['node_modules']
   },
-  eslint: true,
   compilers: {
     less: {
-      compress: true
+      compress: prod
     },
-    /* sass: {
+    /*sass: {
       outputStyle: 'compressed'
-    }, */
+    },*/
     babel: {
       sourceMap: true,
       presets: [
@@ -46,12 +49,9 @@ module.exports = {
 }
 
 if (prod) {
-  delete module.exports.compilers.babel.sourcesMap
+
   // 压缩sass
   // module.exports.compilers['sass'] = {outputStyle: 'compressed'}
-
-  // 压缩less
-  module.exports.compilers['less'] = {compress: true}
 
   // 压缩js
   module.exports.plugins = {

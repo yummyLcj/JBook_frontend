@@ -1,29 +1,3 @@
-<style lang="less">
-  @import './style/weui.less';
-  @import './style/font/iconfont.less';
-  @font-face {
-    font-family: 'iconfont';  /* project id 570343 */
-    src: url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.eot');
-    src: url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.eot?#iefix') format('embedded-opentype'),
-    url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.woff') format('woff'),
-    url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.ttf') format('truetype'),
-    url('//at.alicdn.com/t/font_570343_wulush4hnjhsemi.svg#iconfont') format('svg');
-  }
-  .iconfont {
-    font-family: 'iconfont';
-  }
-  page {
-    font-size: 0;
-  }
-  .full-page {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-  }
-</style>
-
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
@@ -31,8 +5,7 @@ import 'wepy-async-function'
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index',
-      'pages/addRecord'
+      'pages/index'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -42,31 +15,69 @@ export default class extends wepy.app {
     }
   }
 
-  userInfo = {}
+  globalData = {
+    userInfo: null
+  }
 
   constructor () {
     super()
     this.use('requestfix')
   }
 
+  onLaunch() {
+    this.testAsync()
+  }
+
+  sleep (s) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve('promise resolved')
+      }, s * 1000)
+    })
+  }
+
+  async testAsync () {
+    const data = await this.sleep(3)
+    console.log(data)
+  }
+
   getUserInfo(cb) {
     const that = this
-    if (this.userInfo) {
-      return this.userInfo
+    if (this.globalData.userInfo) {
+      return this.globalData.userInfo
     }
     wepy.getUserInfo({
       success (res) {
-        that.userInfo = res.userInfo
+        that.globalData.userInfo = res.userInfo
         cb && cb(res.userInfo)
       },
       fail (res) {
-        that.userInfo = {
+        that.globalData.userInfo = {
           avatarUrl: './../img/avator.png',
           nickName: '游客'
         }
-        cb && cb(that.userInfo)
+        cb && cb(that.globalData.userInfo)
       }
     })
   }
 }
 </script>
+
+<style lang="less">
+  @import url('./font/iconfont.less');
+  .fs42 {
+    font-size: 42rpx;
+  }
+  .fl {
+    float: left;
+  }
+  .fr {
+    float: right;
+  }
+  .tal {
+    text-align: left;
+  }
+  .tar {
+    text-align: right;
+  }
+</style>
