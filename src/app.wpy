@@ -5,6 +5,7 @@ import 'wepy-async-function'
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/add',
       'pages/index'
     ],
     window: {
@@ -79,5 +80,15 @@ export default class extends wepy.app {
   }
   .tar {
     text-align: right;
+  }
+  .mr10 {
+    margin-left: 10rpx;
+  }
+  .icon-border {
+    padding: 10rpx;
+    font-size: 40rpx;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 50%;
   }
 </style>
