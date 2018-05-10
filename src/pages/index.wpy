@@ -34,12 +34,14 @@
         </view>
         <view class="list-item">
           <repeat for="{{item.list}}" item="col">
-            <view class="list-col" >
-              <view class="list-each tal"><text class="iconfont icon-{{col.icon}} {{col.icon}} icon-border"></text></view>
+            <view class="list-col" @longpress="remove({{col}})" @tap="detail({{col}})">
               <view class="list-each tal">
-                <view class="each-title">{{col.title}}</view>
-                <view class="each-name">{{col.name}}</view>
-                <view class="each-remark">{{col.remark}}</view>
+                <view class="col-inline"><text class="iconfont icon-{{col.icon}} {{col.icon}} icon-border"></text></view>
+                <view class="col-inline ml30">
+                  <view class="each-title">{{col.title}}</view>
+                  <view class="each-name">{{col.name}}</view>
+                  <view class="each-remark">{{col.remark}}</view>
+                </view>
               </view>
               <view class="list-each tar fs42">{{col.total}}</view>
             </view>
@@ -170,6 +172,24 @@
         wepy.navigateTo({
           url: 'more/list'
         })
+      },
+      remove (item) {
+        wepy.showModal({
+          title: '提示',
+          content: `确认删除本条账单吗？`,
+          success: function(res) {
+            if (res.confirm) {
+              console.log(item)
+            } else if (res.cancel) {
+              // todo
+            }
+          }
+        })
+      },
+      detail (item) {
+        wepy.navigateTo({
+          url: 'bill/detail'
+        })
       }
     }
 
@@ -250,6 +270,10 @@
         &:last-child {
           border-bottom: none;
         }
+        .col-inline {
+          display: inline-block;
+          vertical-align: middle;
+        }
         .list-each {
           flex: 1;
         }
@@ -257,7 +281,7 @@
           display: inline-block;
           margin-right: 12rpx;
           font-size: 24rpx;
-          margin-top: 20rpx;
+          margin-top: 16rpx;
         }
         .each-remark {
           color: #aaa;

@@ -145,7 +145,7 @@
       }
       .col-inline {
         display: inline-block;
-        vertical-align: center;
+        vertical-align: middle;
       }
       .each-title {
         color: #333;
