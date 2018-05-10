@@ -5,9 +5,9 @@ import 'wepy-async-function'
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/index',
       'pages/bill/add',
       'pages/category/in',
-      'pages/index',
       'pages/book/add',
       'pages/book/list',
       'pages/book/detail',
