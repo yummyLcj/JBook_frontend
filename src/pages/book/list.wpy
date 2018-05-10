@@ -1,0 +1,166 @@
+<template>
+  <view class="container">
+    <repeat for="{{books}}" item="item">
+      <view class="list">
+        <view class="item-title">全部{{item.type}}</view>
+          <repeat for="{{item.list}}" item="col">
+            <view class="list-item {{col.active}}" @longpress="remove({{col}})" @tap="back({{col}})">
+              <view class="item-col">
+                <view class="list-each tal">
+                  <view class="col-inline"><text class="iconfont icon-{{col.icon}} {{col.icon}} item-icon"></text></view>
+                  <view class="col-inline">
+                    <view class="each-title fs42">{{col.name}}</view>
+                    <view class="col-inline">{{col.title}}账本</view>
+                    <view class="col-inline mr10">{{col.member}}人</view>
+                  </view>
+                </view>
+                <view class="list-each tar">共有{{col.total}}笔记账</view>
+              </view>
+            </view>
+          </repeat>
+        </view>
+      </view>
+    </repeat>
+
+    <button class="iconfont add-btn icon-add" @tap="addBook"></button>
+    
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '账本列表'
+    }
+
+    data = {
+      books: [
+        {
+          type: '账本',
+          list: [
+            {
+              icon: 'book',
+              name: '六六',
+              title: '日常',
+              member: 2,
+              total: 28
+            },
+            {
+              icon: 'book',
+              name: '九九',
+              active: 'active',
+              title: '旅行',
+              member: 2,
+              total: 10
+            },
+            {
+              icon: 'book',
+              name: '六六',
+              title: '日常',
+              member: 2,
+              total: 28
+            }
+          ]
+        },
+        {
+          type: '圈子',
+          list: [
+            {
+              icon: 'circle',
+              name: '六六',
+              title: '日常',
+              member: 2,
+              total: 28
+            },
+            {
+              icon: 'circle',
+              name: '九九',
+              title: '旅行',
+              member: 2,
+              total: 10
+            }
+          ]
+        }
+      ]
+    }
+
+    methods = {
+      addBook () {
+        wepy.navigateTo({
+          url: 'add'
+        })
+      },
+      remove (item) {
+        wepy.showModal({
+          title: '提示',
+          content: `确认删除账本${item.name}吗？`,
+          success: function(res) {
+            if (res.confirm) {
+              console.log(item)
+            } else if (res.cancel) {
+              // todo
+            }
+          }
+        })
+      },
+      back (item) {
+        // set global book
+        wepy.redirectTo({
+          url: '../index'
+        })
+      }
+    }
+
+    onLoad(opt) {
+      // get global book
+      this.cur = opt.cur
+    }
+  }
+</script>
+
+<style lang="less">
+  .list {
+    font-size: 24rpx;
+    color: #999;
+    .item-title {
+      padding: 12rpx 40rpx;
+      background-color: #efefef;
+    }
+    .list-item {
+      padding-left: 30rpx;
+      box-sizing: border-box;
+      &.active {
+        border-left: 4px solid #48D1CC;
+      }
+    }
+    .item-col {
+      padding: 20rpx 40rpx 20rpx 10rpx;
+      border-bottom: 1px solid #efefef;
+      display: flex;
+      align-items: center;
+      .list-each {
+        flex: 1;
+      }
+      .col-inline {
+        display: inline-block;
+        vertical-align: center;
+      }
+      .each-title {
+        color: #333;
+        margin-bottom: 20rpx;
+      }
+      .item-icon {
+        font-size: 90rpx;
+        margin-right: 16rpx;
+      }
+      .book {
+        color: #48D1CC;
+      }
+      .circle {
+        color: #81949e;
+      }
+    }
+  }
+</style>

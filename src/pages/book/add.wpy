@@ -1,0 +1,95 @@
+<template>
+  <form class="container" @submit="save">
+    <view class="header">
+      <view class="form-item">
+        <view class="add-each tal">名称</view>
+        <view class="add-each tar">
+          <input type="text" name="amount" placeholder="请输入名称" value="{{book.name}}" />
+        </view>
+      </view>
+      <view class="form-item">
+        <view class="add-each tal">类型</view>
+        <view class="add-each tar">
+          <radio-group class="radio-group" bindchange="radioChange">
+            <label class="radio">
+              <radio value="账本" checked="{{true}}"/>账本
+              <radio value="圈子" checked="{{false}}"/>圈子
+            </label>
+          </radio-group>
+        </view>
+      </view>
+    </view>
+
+    <button class="save" formType="submit" loading="{{btnLoading}}">保存</button>
+  </form>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '添加账本'
+    }
+
+    data = {
+      book: {
+        name: '',
+        type: ''
+      }
+    }
+
+    methods = {
+      radioChange (e) {
+        this.book.type = e.detail.value
+      },
+      save (e) {
+        console.log(e.detail.value, this.book)
+        wepy.navigateTo({
+          url: 'list'
+        })
+      }
+    }
+
+    // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数
+    events = {}
+
+    onLoad(opt) {
+      // todo
+      this.type = opt.type
+    }
+  }
+</script>
+
+<style lang="less">
+  .header {
+    box-sizing: border-box;
+    .form-item {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #efefef;
+      padding: 20rpx 30rpx;
+      font-size: 28rpx;
+      &:first-child {
+        border-top: 1px solid #efefef;
+      }
+      .add-each {
+        flex: 1;
+      }
+    }
+  }
+
+  .save {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80rpx;
+    line-height: 80rpx;
+    border: none;
+    border-radius: 0;
+    background-color: #48D1CC;
+    color: #fff;
+    font-size: 32rpx;
+  }
+</style>

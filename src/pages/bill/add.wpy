@@ -1,11 +1,11 @@
 <template>
   <view class="container">
     <view class="header">
-      <button size="mini" plain class="{{record.type === '1' ? 'selected' : ''}}" @tap="changeType(1)">支出</button>
-      <button size="mini" plain class="{{record.type === '2' ? 'selected': ''}}" @tap="changeType(2)">收入</button>
+      <button size="mini" plain class="{{record.type === 'in' ? 'selected' : ''}}" @tap="changeType('in')">收入</button>
+      <button size="mini" plain class="{{record.type === 'out' ? 'selected': ''}}" @tap="changeType('out')">支出</button>
     </view>
 
-    <form class="add-form">
+    <form class="add-form" @submit="save">
       <view class="add-mount">
         <view class="add-each tal">
           <text class="iconfont icon-{{record.icon}} {{record.icon}} icon-border"></text>
@@ -24,18 +24,19 @@
           <input type="text" name="remark" placeholder="备注" value="{{record.remark}}" />
         </view>
       </view>
+
+
+      <view class="tags">
+        <repeat for="{{tags}}" item="item">
+          <view class="tag-item" @tap="changeIcon({{item}})">
+            <view><text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text></view>
+            <view class="tag-name">{{item.name}}</view>
+          </view>
+        </repeat>
+      </view>
+
+      <button class="save" formType="submit" loading="{{btnLoading}}">保存</button>
     </form>
-
-    <view class="tags">
-      <repeat for="{{tags}}" item="item">
-        <view class="tag-litem">
-          <view><text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text></view>
-          <view class="tag-name">{{item.name}}</view>
-        </view>
-      </repeat>
-    </view>
-
-    <button class="save" @tap="save" loading="{{btnLoading}}">保存</button>
 
     <toast />
   </view>
@@ -59,8 +60,7 @@
         nickName: '加载中...'
       },
       record: {
-        type: '1',
-        typeName: 'out',
+        type: 'out',
         icon: 'shopping',
         name: '日用品',
         date: '2018-05-04',
@@ -69,28 +69,28 @@
       },
       in: [
         {
-          icon: 'eat',
-          name: '餐饮'
+          icon: 'honor',
+          name: '投资'
         },
         {
-          icon: 'present',
-          name: '礼物'
+          icon: 'dollar',
+          name: '收入'
         },
         {
-          icon: 'water',
-          name: '水费'
+          icon: 'earn',
+          name: '收款'
         },
         {
-          icon: 'house',
-          name: '房租'
+          icon: 'money',
+          name: '奖金'
         },
         {
-          icon: 'screen',
-          name: '旅游'
+          icon: 'fee',
+          name: '工资'
         },
         {
-          icon: 'shop',
-          name: '购物'
+          icon: 'pocket',
+          name: '红包'
         },
         {
           icon: 'edit',
@@ -127,7 +127,36 @@
           name: '自定义'
         }
       ],
-      tags: this.out
+      tags: [
+        {
+          icon: 'eat',
+          name: '餐饮'
+        },
+        {
+          icon: 'present',
+          name: '礼物'
+        },
+        {
+          icon: 'water',
+          name: '水费'
+        },
+        {
+          icon: 'house',
+          name: '房租'
+        },
+        {
+          icon: 'screen',
+          name: '旅游'
+        },
+        {
+          icon: 'shop',
+          name: '购物'
+        },
+        {
+          icon: 'edit',
+          name: '自定义'
+        }
+      ]
     }
 
     computed = {
@@ -152,29 +181,31 @@
           url: 'pages/add'
         })
       },
-      save () {
-        console.log(this.record)
+      save (e) {
+        console.log(e.detail.value, this.record)
       },
       getDate (e) {
         this.record.date = e.detail.value
       },
       changeType (type) {
         this.record.type = type
+        this.tags = this[type]
+      },
+      changeIcon (item) {
+        if (item.icon !== 'edit') {
+          this.record.icon = item.icon
+          this.record.name = item.name
+        } else {
+          let url = this.record.type === 'in' ? 'in' : 'out'
+          wepy.navigateTo({
+            url: `../category/${url}`
+          })
+        }
       }
     }
 
     // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数
     events = {}
-
-    onLoad() {
-      let self = this
-      this.$parent.getUserInfo(function (userInfo) {
-        if (userInfo) {
-          self.userInfo = userInfo
-        }
-        self.$apply()
-      })
-    }
   }
 </script>
 
@@ -214,12 +245,18 @@
     padding-bottom: 10rpx;
     margin-bottom: 80rpx;
     font-size: 24rpx;
-    .tag-litem {
+    .tag-item {
       display: inline-block;
       vertical-align: middle;
       width: 20%;
       text-align: center;
       margin-bottom: 30rpx;
+    }
+    &:last-child {
+      .icon-border {
+        color: #ddd;
+        border: 1 px dashed #ddd;
+      }
     }
     .tag-name {
       margin-top: 20rpx;

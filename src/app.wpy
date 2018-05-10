@@ -5,8 +5,15 @@ import 'wepy-async-function'
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/add',
-      'pages/index'
+      'pages/bill/add',
+      'pages/category/in',
+      'pages/index',
+      'pages/book/add',
+      'pages/book/list',
+      'pages/book/detail',
+      'pages/bill/detail',
+      'pages/more/list',
+      'pages/category/out'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -90,5 +97,16 @@ export default class extends wepy.app {
     color: #fff;
     border: 1px solid #fff;
     border-radius: 50%;
+  }
+  .add-btn {
+    position: fixed;
+    bottom: 50rpx;
+    left: 325rpx;
+    width: 100rpx;
+    height: 100rpx;
+    line-height: 100rpx;
+    color: #FFF;
+    border-radius: 100rpx;
+    background-color: #FFCE40;
   }
 </style>

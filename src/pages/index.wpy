@@ -2,10 +2,8 @@
   <view class="container">
     <view class="header">
       <view class="fl"><text class="iconfont icon-total fs42"></text></view>
-      <view class="userinfo-nickname">{{ userInfo.nickName }}<text class="iconfont icon-arrow"></text></view>
-      <view class="fr">
-        <text class="iconfont icon-more"></text>
-      </view>
+      <view class="userinfo-nickname" @tap="showBook">{{ userInfo.nickName }}<text class="iconfont icon-arrow"></text></view>
+      <view class="fr" @tap="more"><text class="iconfont icon-more"></text></view>
       <image class="userinfo-avatar fr" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
       <view class="title">
         <view class="part-view">  
@@ -14,7 +12,7 @@
         </view>
       </view>
       <view class="title">
-        <view class="part-view">  
+        <view class="part-view">
           <view>{{countData.totalInCome}}</view>
           <view>{{countData.date}} 月收入</view>
         </view>
@@ -50,32 +48,18 @@
       </repeat>
     </view>
 
-    <button class="iconfont addBtn icon-add" @tap="addRecord"></button>
+    <button class="iconfont add-btn icon-add" @tap="addRecord"></button>
 
-    <toast />
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import Panel from '@/components/panel' // alias example
-  import Counter from 'counter' // alias example
-  // import moduleA from 'module-a' // aliasFields ignore module example
-  import Toast from 'wepy-com-toast'
-  import testMixin from '../mixins/test'
 
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '账单'
     }
-    components = {
-      panel: Panel,
-      counter1: Counter,
-      counter2: Counter,
-      toast: Toast
-    }
-
-    mixins = [testMixin]
 
     data = {
       userInfo: {
@@ -171,26 +155,20 @@
       ]
     }
 
-    computed = {
-      now () {
-        return +new Date()
-      }
-    }
-
     methods = {
-      toast () {
-        let promise = this.$invoke('toast', 'show', {
-          title: '自定义标题',
-          img: 'https://raw.githubusercontent.com/kiinlam/wetoast/master/images/star.png'
-        })
-
-        promise.then((d) => {
-          console.log('toast done')
-        })
-      },
       addRecord () {
         wepy.navigateTo({
-          url: 'add'
+          url: 'bill/add'
+        })
+      },
+      showBook () {
+        wepy.navigateTo({
+          url: 'book/list'
+        })
+      },
+      more () {
+        wepy.navigateTo({
+          url: 'more/list'
         })
       }
     }
@@ -286,17 +264,5 @@
         }
       }
     }
-  }
-
-  .addBtn {
-    position: fixed;
-    bottom: 50rpx;
-    left: 325rpx;
-    width: 100rpx;
-    height: 100rpx;
-    line-height: 100rpx;
-    color: #FFF;
-    border-radius: 100rpx;
-    background-color: #FFCE40;
   }
 </style>
