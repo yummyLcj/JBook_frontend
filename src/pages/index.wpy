@@ -2,7 +2,7 @@
   <view class="container">
     <view class="header">
       <view class="fl"><text class="iconfont icon-total fs42"></text></view>
-      <view class="userinfo-nickname" @tap="showBook">{{ userInfo.nickName }}<text class="iconfont icon-arrow"></text></view>
+      <view class="default-account" @tap="showBook">{{ account.accountName }}<text class="iconfont icon-arrow"></text></view>
       <view class="fr" @tap="more"><text class="iconfont icon-more"></text></view>
       <image class="userinfo-avatar fr" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
       <view class="title">
@@ -34,7 +34,7 @@
         </view>
         <view class="list-item">
           <repeat for="{{item.list}}" item="col">
-            <view class="list-col" @longpress="remove({{col}})" @tap="detail({{col}})">
+            <view class="list-col" @longpress="remove" @tap="detail" data-rid="{{col.rid}}">
               <view class="list-each tal">
                 <view class="col-inline"><text class="iconfont icon-{{col.icon}} {{col.icon}} icon-border"></text></view>
                 <view class="col-inline ml30">
@@ -57,6 +57,11 @@
 
 <script>
   import wepy from 'wepy'
+  import login from 'com/login'
+  import checkLogin from 'com/check-login'
+  import ajax from 'com/ajax'
+
+  const dayMap = ['一', '二', '三', '四', '五', '六', '日']
 
   export default class Index extends wepy.page {
     config = {
@@ -64,103 +69,30 @@
     }
 
     data = {
+      now: new Date(),
       userInfo: {
         nickName: '加载中...'
       },
-      countData: {
-        totalCount: 100,
-        totalInCome: 200,
-        totalSpending: 100,
-        date: 7
+      pageInfo: {
+        page: 1,
+        isLoading: false
       },
-      bills: [
-        {
-          date: '2017年05月08日',
-          week: '星期二',
-          list: [
-            {
-              icon: 'gift',
-              title: '礼物',
-              name: 'fickle',
-              remark: '生日',
-              total: 119
-            },
-            {
-              icon: 'drink',
-              title: '礼物',
-              name: 'fickle',
-              remark: '生日',
-              total: 20
-            }
-          ]
-        },
-        {
-          date: '2017年05月03日',
-          week: '星期三',
-          list: [
-            {
-              icon: 'tel',
-              title: '礼物',
-              name: 'fickle',
-              remark: '生日',
-              total: 11.9
-            },
-            {
-              icon: 'shopping',
-              title: '礼物',
-              name: 'fickle',
-              remark: '生日',
-              total: 20
-            }
-          ]
-        },
-        {
-          date: '2017年05月08日',
-          week: '星期二',
-          list: [
-            {
-              icon: 'sing',
-              title: '礼物',
-              name: 'fickle',
-              remark: '生日',
-              total: 119
-            },
-            {
-              icon: 'drink',
-              title: '礼物',
-              name: 'fickle',
-              remark: '生日',
-              total: 20
-            }
-          ]
-        },
-        {
-          date: '2017年05月03日',
-          week: '星期三',
-          list: [
-            {
-              icon: 'bus',
-              title: '礼物',
-              name: 'fickle',
-              remark: '生日',
-              total: 11.9
-            },
-            {
-              icon: 'lip',
-              title: '礼物',
-              name: 'fickle',
-              remark: '生日',
-              total: 20
-            }
-          ]
-        }
-      ]
+      account: {
+        accountName: '默认账单'
+      },
+      countData: {
+        totalCount: 0,
+        totalInCome: 0,
+        totalSpending: 0,
+        date: 1
+      },
+      bills: []
     }
 
     methods = {
       addRecord () {
         wepy.navigateTo({
-          url: 'bill/add'
+          url: `bill/add?aid=${this.account.aid}`
         })
       },
       showBook () {
@@ -186,9 +118,9 @@
           }
         })
       },
-      detail (item) {
+      detail (e) {
         wepy.navigateTo({
-          url: 'bill/detail'
+          url: `bill/detail?rid=${e.target.dataset.rid}`
         })
       }
     }
@@ -196,14 +128,95 @@
     // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数
     events = {}
 
-    onLoad() {
-      let self = this
-      this.$parent.getUserInfo(function (userInfo) {
-        if (userInfo) {
-          self.userInfo = userInfo
+    gettingAccounts(aid = 0, fromDate, endDate) {
+      return ajax({
+        data: {
+          method: `/account/{uid}/${aid}`,
+          fromDate,
+          endDate
         }
+      })
+        .then((res) => {
+          const data = res.data.data
+          let countData = {
+            totalSpending: data.outcome,
+            totalInCome: data.income,
+            totalCount: data.income - data.outcome,
+            date: new Date().getMonth() + 1
+          }
+          this.account = data
+          this.countData = countData
+          return res.data.data
+        })
+    }
 
-        self.$apply()
+    recordsObj = {}
+    parseRecords(records) {
+      records.forEach((record) => {
+        let date = record.time
+        let week = `星期${dayMap[new Date(date).getDay() - 1]}`
+        let listItem = {
+          rid: record.rid,
+          icon: record.type.code,
+          title: record.type.name,
+          name: record.editer.name,
+          remark: record.note,
+          total: record.mount
+        }
+        if (this.recordsObj[date]) {
+          this.recordsObj[date].list.push(listItem)
+        } else {
+          this.recordsObj[date] = {
+            date,
+            week,
+            list: [listItem]
+          }
+        }
+      })
+      return this.recordsObj
+    }
+
+    gettingRecords(aid, fromDate, endDate) {
+      return ajax({
+        data: {
+          method: `/records/{uid}/${aid}`,
+          page: this.pageInfo.page,
+          fromDate,
+          endDate
+        }
+      })
+        .then((res) => {
+          const data = res.data.data.data
+          const bills = this.parseRecords(data)
+          this.bills = bills
+        })
+    }
+
+    initPage(aid = 0) {
+      let now = this.now
+      let fromDate = `${now.getFullYear()}-${now.getMonth() + 1}-1`
+      let endDate = `${now.getFullYear()}-${now.getMonth() + 1}-31`
+      this.userInfo = wepy.getStorageSync('userInfo')
+      this.gettingAccounts(aid, fromDate, endDate)
+        .then((res) => {
+          this.gettingRecords(res.aid, fromDate, endDate)
+            .then(() => {
+              this.$apply()
+            })
+        })
+    }
+
+    onLoad(query) {
+      const aid = query.aid || 0
+      checkLogin((uid) => {
+        if (uid) {
+          this.initPage(aid)
+        } else {
+          login()
+            .then((res) => {
+              this.initPage(aid)
+            })
+        }
       })
     }
   }
@@ -215,7 +228,7 @@
     background-color: #48D1CC;
     text-align: center;
     color: #FFF;
-    .userinfo-nickname {
+    .default-account {
       display: inline-block;
       padding: 8rpx 12rpx;
       font-size: 28rpx;

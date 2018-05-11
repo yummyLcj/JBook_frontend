@@ -12,7 +12,7 @@
           <text class="mr10">{{record.name}}</text>
         </view>
         <view class="add-each tar">
-          <input class="fs42" type="digit" name="amount" placeholder="0" value="{{record.amount}}" />
+          <input class="fs42" type="digit" name="amount" placeholder="0" value="{{record.amount}}"/>
         </view>
       </view>
       <view class="add-mount">
@@ -21,10 +21,9 @@
           <text class="mr10">{{record.date}}</text>
         </picker>
         <view class="add-each tar">
-          <input type="text" name="remark" placeholder="备注" value="{{record.remark}}" />
+          <input type="text" name="remark" placeholder="备注" value="{{record.remark}}"/>
         </view>
       </view>
-
 
       <view class="tags">
         <repeat for="{{tags}}" item="item">
@@ -45,6 +44,7 @@
 <script>
   import wepy from 'wepy'
   import Toast from 'wepy-com-toast'
+  import ajax from 'com/ajax'
 
   export default class Index extends wepy.page {
     config = {
@@ -56,113 +56,66 @@
     }
 
     data = {
-      userInfo: {
-        nickName: '加载中...'
-      },
       record: {
-        type: 'out',
-        icon: 'shopping',
-        name: '日用品',
-        date: '2018-05-04',
-        amount: '100',
-        remark: 'yeyeye'
+        aid: 0,
+        type: 'in',
+        icon: '',
+        name: '',
+        date: '',
+        amount: '',
+        remark: ''
       },
-      in: [
-        {
-          icon: 'honor',
-          name: '投资'
-        },
-        {
-          icon: 'dollar',
-          name: '收入'
-        },
-        {
-          icon: 'earn',
-          name: '收款'
-        },
-        {
-          icon: 'money',
-          name: '奖金'
-        },
-        {
-          icon: 'fee',
-          name: '工资'
-        },
-        {
-          icon: 'pocket',
-          name: '红包'
-        },
-        {
-          icon: 'edit',
-          name: '自定义'
-        }
-      ],
-      out: [
-        {
-          icon: 'eat',
-          name: '餐饮'
-        },
-        {
-          icon: 'present',
-          name: '礼物'
-        },
-        {
-          icon: 'water',
-          name: '水费'
-        },
-        {
-          icon: 'house',
-          name: '房租'
-        },
-        {
-          icon: 'screen',
-          name: '旅游'
-        },
-        {
-          icon: 'shop',
-          name: '购物'
-        },
-        {
-          icon: 'edit',
-          name: '自定义'
-        }
-      ],
-      tags: [
-        {
-          icon: 'eat',
-          name: '餐饮'
-        },
-        {
-          icon: 'present',
-          name: '礼物'
-        },
-        {
-          icon: 'water',
-          name: '水费'
-        },
-        {
-          icon: 'house',
-          name: '房租'
-        },
-        {
-          icon: 'screen',
-          name: '旅游'
-        },
-        {
-          icon: 'shop',
-          name: '购物'
-        },
-        {
-          icon: 'edit',
-          name: '自定义'
-        }
-      ]
+      in: [],
+      out: [],
+      tags: []
     }
 
     computed = {
       now () {
         return +new Date()
       }
+    }
+
+    gettingTypes() {
+      return ajax({
+        data: {
+          method: '/types/{uid}'
+        }
+      })
+        .then((res) => {
+          let income = []
+          let outcome = []
+          res.data.data.forEach(({type}) => {
+            let yinfo = {
+              tid: type.tid,
+              type: type.type === 0 ? 'in' : 'out',
+              name: type.name,
+              icon: type.code
+            }
+            if (type.type === 0) {
+              income.push(yinfo)
+            } else {
+              outcome.push(yinfo)
+            }
+          })
+          this.in = income
+          this.tags = income
+          this.out = outcome
+          return [income, outcome]
+        })
+    }
+
+    onLoad(query) {
+      this.gettingTypes()
+        .then((res) => {
+          this.record.aid = query.aid
+          this.record.tid = res[0][0].tid
+          this.record.icon = res[0][0].icon
+          this.record.name = res[0][0].name
+          const now = new Date()
+          this.record.date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`
+          this.$apply()
+        })
     }
 
     methods = {
@@ -182,7 +135,23 @@
         })
       },
       save (e) {
-        console.log(e.detail.value, this.record)
+        const record = this.record
+        const detail = e.detail.value
+        let data = {
+          method: `/record/{uid}/${record.aid}`,
+          amount: detail.amount,
+          balanceType: record.type === 'in' ? 0 : 1,
+          tid: record.tid,
+          note: detail.remark,
+          time: record.date
+        }
+        ajax({
+          method: 'post',
+          data
+        })
+          .then((res) => {
+            console.log(res)
+          })
       },
       getDate (e) {
         this.record.date = e.detail.value
@@ -195,6 +164,7 @@
         if (item.icon !== 'edit') {
           this.record.icon = item.icon
           this.record.name = item.name
+          this.record.tid = item.tid
         } else {
           let url = this.record.type === 'in' ? 'in' : 'out'
           wepy.navigateTo({

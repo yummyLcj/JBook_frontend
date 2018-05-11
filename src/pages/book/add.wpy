@@ -4,7 +4,7 @@
       <view class="form-item">
         <view class="add-each tal">名称</view>
         <view class="add-each tar">
-          <input type="text" name="amount" placeholder="请输入名称" value="{{book.name}}" />
+          <input type="text" name="name" placeholder="请输入名称" value="{{book.name}}" />
         </view>
       </view>
       <view class="form-item">
@@ -26,6 +26,7 @@
 
 <script>
   import wepy from 'wepy'
+  import ajax from 'com/ajax'
 
   export default class Index extends wepy.page {
     config = {
@@ -35,7 +36,7 @@
     data = {
       book: {
         name: '',
-        type: ''
+        type: '0'
       }
     }
 
@@ -45,9 +46,20 @@
       },
       save (e) {
         console.log(e.detail.value, this.book)
-        wepy.navigateTo({
-          url: 'list'
+        let data = {
+          method: '/account/{uid}',
+          accountName: e.detail.value.name,
+          type: this.book.type
+        }
+        ajax({
+          data,
+          method: 'post'
+        }).then((res) => {
+          console.log(res)
         })
+        // wepy.navigateTo({
+        //   url: 'list'
+        // })
       }
     }
 

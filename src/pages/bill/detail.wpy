@@ -24,10 +24,8 @@
           <input type="text" name="remark" placeholder="备注" value="{{record.remark}}" />
         </view>
       </view>
-
       <button class="save" formType="submit" loading="{{btnLoading}}">编辑</button>
     </form>
-
     <toast />
   </view>
 </template>
@@ -35,6 +33,7 @@
 <script>
   import wepy from 'wepy'
   import Toast from 'wepy-com-toast'
+  import ajax from 'com/ajax'
 
   export default class Index extends wepy.page {
     config = {
@@ -46,16 +45,13 @@
     }
 
     data = {
-      userInfo: {
-        nickName: '加载中...'
-      },
       record: {
-        type: 'out',
-        icon: 'shopping',
-        name: '日用品',
-        date: '2018-05-04',
-        amount: '100',
-        remark: 'yeyeye'
+        type: '',
+        icon: '',
+        name: '',
+        date: '',
+        amount: '',
+        remark: ''
       }
     }
 
@@ -66,23 +62,29 @@
     }
 
     methods = {
-      toast () {
-        let promise = this.$invoke('toast', 'show', {
-          title: '自定义标题',
-          img: 'https://raw.githubusercontent.com/kiinlam/wetoast/master/images/star.png'
-        })
-
-        promise.then((d) => {
-          console.log('toast done')
-        })
-      },
       addRecord () {
         wepy.navigateTo({
           url: 'pages/add'
         })
       },
       save (e) {
-        console.log(e.detail.value, this.record)
+        const record = this.record
+        const detail = e.detail.value
+        let data = {
+          method: `/record/${record.aid}/${record.rid}`,
+          amount: detail.amount,
+          balanceType: record.type === 'in' ? 0 : 1,
+          tid: record.tid,
+          note: detail.remark,
+          time: record.date
+        }
+        ajax({
+          method: 'put',
+          data
+        })
+          .then((res) => {
+            console.log(res)
+          })
       },
       getDate (e) {
         this.record.date = e.detail.value
@@ -102,6 +104,32 @@
           })
         }
       }
+    }
+
+    gettingRecord(rid) {
+      return ajax({
+        data: {
+          method: `/record/${rid}`
+        }
+      })
+        .then((res) => {
+          const data = res.data.data[0]
+          this.record = {
+            rid,
+            aid: data.aid,
+            type: data.balanceType.toString() === '0' ? 'in' : 'out',
+            icon: data.type.code,
+            name: data.type.name,
+            tid: data.type.tid,
+            date: data.time,
+            amount: data.amount,
+            remark: data.note
+          }
+        })
+    }
+
+    onLoad(query) {
+      this.gettingRecord(query.rid)
     }
 
     // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数

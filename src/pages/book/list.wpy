@@ -4,7 +4,7 @@
       <view class="list">
         <view class="item-title">全部{{item.type}}</view>
           <repeat for="{{item.list}}" item="col">
-            <view class="list-item {{col.active}}" @longpress="remove({{col}})" @tap="back({{col}})">
+            <view class="list-item {{col.active}}" @longpress="remove" @tap="back">
               <view class="item-col">
                 <view class="list-each tal">
                   <view class="col-inline"><text class="iconfont icon-{{col.icon}} {{col.icon}} item-icon"></text></view>
@@ -21,14 +21,13 @@
         </view>
       </view>
     </repeat>
-
     <button class="iconfont add-btn icon-add" @tap="addBook"></button>
-    
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import ajax from 'com/ajax'
 
   export default class Index extends wepy.page {
     config = {
@@ -36,54 +35,7 @@
     }
 
     data = {
-      books: [
-        {
-          type: '账本',
-          list: [
-            {
-              icon: 'book',
-              name: '六六',
-              title: '日常',
-              member: 2,
-              total: 28
-            },
-            {
-              icon: 'book',
-              name: '九九',
-              active: 'active',
-              title: '旅行',
-              member: 2,
-              total: 10
-            },
-            {
-              icon: 'book',
-              name: '六六',
-              title: '日常',
-              member: 2,
-              total: 28
-            }
-          ]
-        },
-        {
-          type: '圈子',
-          list: [
-            {
-              icon: 'circle',
-              name: '六六',
-              title: '日常',
-              member: 2,
-              total: 28
-            },
-            {
-              icon: 'circle',
-              name: '九九',
-              title: '旅行',
-              member: 2,
-              total: 10
-            }
-          ]
-        }
-      ]
+      books: []
     }
 
     methods = {
@@ -113,9 +65,37 @@
       }
     }
 
+    gettingAccounts() {
+      return ajax({
+        data: {
+          method: '/accounts/{uid}'
+        }
+      }).then((res) => {
+        let accounts = [
+          {
+            type: '账本',
+            list: []
+          }
+        ]
+        res.data.data.forEach((account) => {
+          let item = {
+            icon: 'book',
+            name: account.account.accountName,
+            aid: account.aid,
+            access: account.access,
+            title: account.type === 1 ? '日常' : 'AA',
+            member: account.memberCount,
+            total: 28
+          }
+          accounts[0].list.push(item)
+        })
+        this.books = accounts
+        this.$apply()
+      })
+    }
+
     onLoad(opt) {
-      // get global book
-      this.cur = opt.cur
+      this.gettingAccounts()
     }
   }
 </script>
@@ -141,15 +121,23 @@
       display: flex;
       align-items: center;
       .list-each {
-        flex: 1;
+        flex: 2;
+      }
+      .tal {
+        flex: 3;
       }
       .col-inline {
         display: inline-block;
         vertical-align: middle;
       }
       .each-title {
-        color: #333;
         margin-bottom: 20rpx;
+        font-size: 26rpx;
+        width: 280rpx;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: #333;
       }
       .item-icon {
         font-size: 90rpx;
