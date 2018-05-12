@@ -3,7 +3,7 @@
     <view class="header">
       <view class="fl"><text class="iconfont icon-total fs42"></text></view>
       <view class="default-account" @tap="showBook">{{ account.accountName }}<text class="iconfont icon-arrow"></text></view>
-      <view class="fr" @tap="more"><text class="iconfont icon-more"></text></view>
+      <view class="share-brn fr" @tap="share">共享</view>
       <image class="userinfo-avatar fr" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
       <view class="title">
         <view class="part-view">  
@@ -30,11 +30,11 @@
             <text>{{item.date}}</text>
             <text>{{item.week}}</text>
           </view>
-          <view class="title-right">支出：100</view>
+          <view class="title-right">支出：{{item.totalCount}}</view>
         </view>
         <view class="list-item">
           <repeat for="{{item.list}}" item="col">
-            <view class="list-col" @longpress="remove" @tap="detail" data-rid="{{col.rid}}">
+            <view class="list-col" @longpress="remove" @tap="detail({{col.rid}})">
               <view class="list-each tal">
                 <view class="col-inline"><text class="iconfont icon-{{col.icon}} {{col.icon}} icon-border"></text></view>
                 <view class="col-inline ml30">
@@ -61,7 +61,7 @@
   import checkLogin from 'com/check-login'
   import ajax from 'com/ajax'
 
-  const dayMap = ['一', '二', '三', '四', '五', '六', '日']
+  const dayMap = ['日', '一', '二', '三', '四', '五', '六']
 
   export default class Index extends wepy.page {
     config = {
@@ -70,6 +70,7 @@
 
     data = {
       now: new Date(),
+      aid: null,
       userInfo: {
         nickName: '加载中...'
       },
@@ -92,17 +93,17 @@
     methods = {
       addRecord () {
         wepy.navigateTo({
-          url: `bill/add?aid=${this.account.aid}`
+          url: `/pages/bill/add?aid=${this.account.aid}`
         })
       },
       showBook () {
-        wepy.navigateTo({
-          url: 'book/list'
+        wepy.redirectTo({
+          url: '/pagesbook/list'
         })
       },
-      more () {
+      share () {
         wepy.navigateTo({
-          url: 'more/list'
+          url: `/pages/share?aid=${this.account.aid}`
         })
       },
       remove (item) {
@@ -118,9 +119,9 @@
           }
         })
       },
-      detail (e) {
+      detail (rid) {
         wepy.navigateTo({
-          url: `bill/detail?rid=${e.target.dataset.rid}`
+          url: `bill/detail?rid=${rid}`
         })
       }
     }
@@ -150,25 +151,27 @@
         })
     }
 
-    recordsObj = {}
     parseRecords(records) {
       records.forEach((record) => {
         let date = record.time
-        let week = `星期${dayMap[new Date(date).getDay() - 1]}`
+        let week = `星期${dayMap[new Date(date).getDay()]}`
         let listItem = {
           rid: record.rid,
           icon: record.type.code,
           title: record.type.name,
           name: record.editer.name,
           remark: record.note,
-          total: record.mount
+          total: record.amount,
+          type: record.balanceType.toString()
         }
         if (this.recordsObj[date]) {
           this.recordsObj[date].list.push(listItem)
+          this.recordsObj[date].totalCount += (listItem.type === '0' ? -listItem.total : listItem.total)
         } else {
           this.recordsObj[date] = {
             date,
             week,
+            totalCount: listItem.type === '0' ? -listItem.total : listItem.total,
             list: [listItem]
           }
         }
@@ -206,8 +209,9 @@
         })
     }
 
-    onLoad(query) {
-      const aid = query.aid || 0
+    onShow() {
+      const aid = this.aid
+      this.recordsObj = {}
       checkLogin((uid) => {
         if (uid) {
           this.initPage(aid)
@@ -219,6 +223,17 @@
         }
       })
     }
+
+    onLoad(query) {
+      this.aid = query.aid || 0
+    }
+
+    onShareAppMessage() {
+      return {
+        title: `${this.userInfo.nickName}邀请你一同记账`,
+        path: `/page/share?source=${wepy.getStorageSync('sessionUid')},${this.account.aid},${+new Date()}`
+      }
+    }
   }
 </script>
 
@@ -229,25 +244,36 @@
     text-align: center;
     color: #FFF;
     .default-account {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
       display: inline-block;
       padding: 8rpx 12rpx;
       font-size: 28rpx;
       border: 1rpx solid #FFF;
       border-radius: 20rpx;
-      margin-left:68rpx;
     }
     .userinfo-avatar {
       width: 40rpx;
       height: 40rpx;
       border-radius: 50%;
-      margin-top: 10rpx;
+      margin-top: 5rpx;
       margin-right: 30rpx;
+    }
+    .share-brn {
+      vertical-align: top;
+      font-size: 24rpx;
+      padding: 8rpx;
     }
     .title {
       display: flex;
       text-align: center;
       margin-top: 50rpx;
       font-size: 30rpx;
+      clear: both;
+      &:nth-child(5) {
+        margin-top: 90rpx;
+      }
       .part-view {
         flex: 1;
       }

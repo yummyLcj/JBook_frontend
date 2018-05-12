@@ -83,7 +83,12 @@
           data
         })
           .then((res) => {
-            console.log(res)
+            wepy.showToast({
+              title: '保存成功!'
+            })
+            setTimeout(() => {
+              wepy.navigateBack()
+            }, 1000)
           })
       },
       getDate (e) {

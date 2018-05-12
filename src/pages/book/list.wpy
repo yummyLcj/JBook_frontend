@@ -4,7 +4,7 @@
       <view class="list">
         <view class="item-title">全部{{item.type}}</view>
           <repeat for="{{item.list}}" item="col">
-            <view class="list-item {{col.active}}" @longpress="remove" @tap="back">
+            <view class="list-item {{col.active}}" @longpress="remove" @tap="back({{col.aid}})">
               <view class="item-col">
                 <view class="list-each tal">
                   <view class="col-inline"><text class="iconfont icon-{{col.icon}} {{col.icon}} item-icon"></text></view>
@@ -57,10 +57,9 @@
           }
         })
       },
-      back (item) {
-        // set global book
+      back (aid) {
         wepy.redirectTo({
-          url: '../index'
+          url: `/pages/index?aid=${aid}`
         })
       }
     }

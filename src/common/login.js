@@ -29,7 +29,8 @@ export default () => {
         data: {
           method: '/session',
           code: res[0].code,
-          name: res[1].userInfo.nickName
+          name: res[1].userInfo.nickName,
+          avatar: res[1].userInfo.avatarUrl
         }
       })
         .then((resp) => {

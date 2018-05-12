@@ -1,0 +1,203 @@
+<template>
+  <view>
+    <block wx:for="{{members}}">
+      <view class="user" @tap="changeAccess" data-uid="{{item.uid}}">
+        <image src="{{item.user.avatar}}" class="user-avatar"/>
+        <view class="user-info">
+          <view class="user-name">{{item.user.name}}</view>
+          <view class="user-access">{{item.access}}</view>
+        </view>
+      </view>
+    </block>
+    <button class="share-btn" open-type="share">分享账本</button>
+    <view class="share-type" @tap="changeShareType">新成员默认权限为：{{shareAccess}}<text class="icon-arrow iconfont"></text></view>
+  </view>
+</template>
+
+<style lang="less">
+  .user {
+    height: 99rpx;
+    font-size: 0;
+    border-bottom: 1rpx solid #EEE;
+    .user-avatar {
+      display: inline-block;
+      margin: 10rpx;
+      width: 80rpx;
+      height: 80rpx;
+      vertical-align: top;
+    }
+    .user-info {
+      margin: 25rpx;
+      display: inline-block;
+      width: 400rpx;
+      vertical-align: top;
+      .user-name {
+        font-size: 26rpx;
+        line-height: 26rpx;
+      }
+      .user-access {
+        margin-top: 4rpx;
+        font-size: 20rpx;
+        line-height: 20rpx;
+      }
+    }
+  }
+  .share-btn {
+    margin: 40rpx auto 20rpx;
+    width: 600rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+    font-size: 36rpx;
+    text-align: center;
+    color: #FFF;
+    background: #48D1CC;
+    border-radius: 8rpx;
+  }
+  .share-type {
+    text-align: center;
+    font-size: 26rpx;
+  }
+</style>
+
+<script>
+  import wepy from 'wepy'
+  import login from 'com/login'
+  import checkLogin from 'com/check-login'
+  import ajax from 'com/ajax'
+  export default class Share extends wepy.page {
+    data = {
+      aid: null,
+      shareAccess: '编辑权限',
+      accessType: 2,
+      members: []
+    }
+
+    addAccount(source) {
+      ajax({
+        method: 'post',
+        data: {
+          method: '/accounts/{uid}',
+          source
+        }
+      })
+        .then((res) => {
+          if (res.success) {
+            wepy.showToast({
+              title: '加入成功!'
+            })
+          } else {
+            wepy.showToast({
+              title: res.data.data,
+              icon: 'none'
+            })
+          }
+          setTimeout(() => {
+            wepy.redirectTo({
+              url: `/pages/index?aid=${res.data.data.aid || 0}`
+            })
+          }, 1500)
+        })
+    }
+
+    addingAccount(source) {
+      wepy.showModal({
+        content: '是否加入账本',
+        success: () => {
+          checkLogin((uid) => {
+            if (uid) {
+              this.addAccount(source)
+            } else {
+              login(() => {
+                this.addAccount(source)
+              })
+            }
+          })
+        },
+        fail() {
+          wepy.redirectTo({
+            url: '/pages/index'
+          })
+        }
+      })
+    }
+
+    gettingMember(aid) {
+      console.log(111)
+      return ajax({
+        data: {
+          method: `/accounts/users/${aid}`
+        }
+      }).then((res) => {
+        const data = res.data.data
+        const access = ['拥有者', '管理员', '成员', '游客']
+        data.forEach(ele => {
+          ele.access = access[ele.access]
+        })
+        this.members = res.data.data
+        this.$apply()
+      })
+    }
+
+    showMember(aid) {
+      this.gettingMember(aid)
+    }
+
+    changeShareType() {
+      const access = ['管理权限', '编辑权限', '只读权限']
+      const that = this
+      wepy.showActionSheet({
+        itemList: access,
+        success(res) {
+          that.shareAccess = access[res.tapIndex]
+          that.accessType = res.tapIndex + 1
+          that.$apply()
+        }
+      })
+    }
+
+    onShareAppMessage() {
+      return {
+        title: `${wepy.getStorageSync('userInfo').nickName}邀请你一同记账`,
+        path: `/page/share?source={uid},${this.aid},${this.accessType},${+new Date()}`
+      }
+    }
+
+    changeAccess(e) {
+      const uid = e.currentTarget.dataset.uid
+      const that = this
+      const access = ['管理权限', '编辑权限', '只读权限']
+      wepy.showModal({
+        title: '是否需要修改权限',
+        success() {
+          wepy.showActionSheet({
+            itemList: access,
+            success(res) {
+              ajax({
+                method: 'post',
+                data: {
+                  method: `/accounts/${uid}`,
+                  source: `${uid},${that.aid},${res.tapIndex + 1},${+new Date()}`
+                }
+              }).then((res) => {
+                if (res.success) {
+                  wepy.showToast({
+                    title: '修改成功!'
+                  })
+                }
+              })
+            }
+          })
+        }
+      })
+    }
+
+    onLoad(query) {
+      if (query.source) {
+        this.addingAccount(query.source)
+      } else {
+        this.aid = query.aid
+        this.showMember(query.aid)
+      }
+    }
+  }
+</script>
