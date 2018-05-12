@@ -77,6 +77,8 @@
             list: []
           }
         ]
+        const memberCount = res.data.memberCount
+        const recordCount = res.data.recordCount
         res.data.data.forEach((account) => {
           let item = {
             icon: 'book',
@@ -84,8 +86,8 @@
             aid: account.aid,
             access: account.access,
             title: account.type === 1 ? '日常' : 'AA',
-            member: account.memberCount,
-            total: 28
+            member: memberCount[account.aid] || 0,
+            total: recordCount[account.aid] || 0
           }
           accounts[0].list.push(item)
         })
