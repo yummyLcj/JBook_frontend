@@ -28,7 +28,7 @@
   import wepy from 'wepy'
   import ajax from 'com/ajax'
 
-  export default class Index extends wepy.page {
+  export default class Add extends wepy.page {
     config = {
       navigationBarTitleText: '添加账本'
     }

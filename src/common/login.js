@@ -10,36 +10,24 @@ const gettingCode = () => (
   })
 )
 
-const gettingUserInfo = () => (
-  new Promise((resolve, reject) => {
-    wepy.getUserInfo({
-      success: resolve,
-      fail: reject
+export default (userInfo) => {
+  return gettingCode().then((res) => {
+    return ajax({
+      method: 'post',
+      data: {
+        method: '/session',
+        code: res.code,
+        name: userInfo.nickName || '',
+        avatar: userInfo.avatarUrl || ''
+      }
     })
-  })
-)
-
-export default () => {
-  const code = gettingCode()
-  const userInfo = gettingUserInfo()
-  return Promise.all([code, userInfo])
-    .then((res) => {
-      return ajax({
-        method: 'post',
-        data: {
-          method: '/session',
-          code: res[0].code,
-          name: res[1].userInfo.nickName,
-          avatar: res[1].userInfo.avatarUrl
-        }
+      .then((resp) => {
+        wepy.setStorageSync('sessionUid', resp.data.uid)
+        wepy.setStorageSync('userInfo', resp.data.userInfo)
+        return resp
       })
-        .then((resp) => {
-          wepy.setStorageSync('sessionUid', resp.data.uid)
-          wepy.setStorageSync('userInfo', res[1].userInfo)
-          return resp
-        })
-    })
-    .catch((err) => {
-      console.error(err)
-    })
+  })
+  .catch((err) => {
+    console.error(err)
+  })
 }

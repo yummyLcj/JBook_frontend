@@ -1,5 +1,6 @@
 <template>
-  <view>
+<view>
+  <view wx:if="{{aid}}">
     <block wx:for="{{members}}">
       <view class="user" @tap="changeAccess" data-uid="{{item.uid}}">
         <image src="{{item.user.avatar}}" class="user-avatar"/>
@@ -12,6 +13,10 @@
     <button class="share-btn" open-type="share">分享账本</button>
     <view class="share-type" @tap="changeShareType">新成员默认权限为：{{shareAccess}}<text class="icon-arrow iconfont"></text></view>
   </view>
+  <view wx:else>
+    <button open-type="getUserInfo" bindgetuserinfo="addingAccount">加入账本</button>
+  </view>
+</view>
 </template>
 
 <style lang="less">
@@ -67,9 +72,12 @@
   export default class Share extends wepy.page {
     data = {
       aid: null,
+      source: null,
+      selfAccess: 2,
       shareAccess: '编辑权限',
       accessType: 2,
-      members: []
+      members: [],
+      userInfo: {}
     }
 
     addAccount(source) {
@@ -93,36 +101,37 @@
           }
           setTimeout(() => {
             wepy.redirectTo({
-              url: `/pages/index?aid=${res.data.data.aid || 0}`
+              url: `/pages/normal?aid=${res.data.data.aid || 0}`
             })
           }, 1500)
         })
     }
 
-    addingAccount(source) {
+    addingAccount(e = {}) {
+      const userInfo = e.detail ? e.detail.userInfo : {}
+      this.userInfo = userInfo
       wepy.showModal({
         content: '是否加入账本',
         success: () => {
           checkLogin((uid) => {
             if (uid) {
-              this.addAccount(source)
+              this.addAccount(this.source)
             } else {
-              login(() => {
-                this.addAccount(source)
+              login(userInfo).then((res) => {
+                this.addAccount(this.source)
               })
             }
           })
         },
         fail() {
           wepy.redirectTo({
-            url: '/pages/index'
+            url: '/pages/normal'
           })
         }
       })
     }
 
     gettingMember(aid) {
-      console.log(111)
       return ajax({
         data: {
           method: `/accounts/users/${aid}`
@@ -157,7 +166,7 @@
 
     onShareAppMessage() {
       return {
-        title: `${wepy.getStorageSync('userInfo').nickName}邀请你一同记账`,
+        title: `${wepy.getStorageSync('userInfo').name}邀请你一同记账`,
         path: `/page/share?source={uid},${this.aid},${this.accessType},${+new Date()}`
       }
     }
@@ -172,6 +181,14 @@
           wepy.showActionSheet({
             itemList: access,
             success(res) {
+              console.log(res.tapIndex, that.selfAccess)
+              if (res.tapIndex + 1 <= that.selfAccess) {
+                wepy.showToast({
+                  title: '权限不足！',
+                  icon: 'none'
+                })
+                return
+              }
               ajax({
                 method: 'post',
                 data: {
@@ -193,9 +210,11 @@
 
     onLoad(query) {
       if (query.source) {
-        this.addingAccount(query.source)
+        this.source = query.source
+        // this.addingAccount(query.source)
       } else {
         this.aid = query.aid
+        this.selfAccess = query.access
         this.showMember(query.aid)
       }
     }

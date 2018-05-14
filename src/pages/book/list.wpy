@@ -29,7 +29,7 @@
   import wepy from 'wepy'
   import ajax from 'com/ajax'
 
-  export default class Index extends wepy.page {
+  export default class List extends wepy.page {
     config = {
       navigationBarTitleText: '账本列表'
     }
@@ -59,7 +59,7 @@
       },
       back (aid) {
         wepy.redirectTo({
-          url: `/pages/index?aid=${aid}`
+          url: `/pages/normal?aid=${aid}`
         })
       }
     }

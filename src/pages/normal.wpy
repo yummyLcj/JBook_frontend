@@ -1,0 +1,373 @@
+<template>
+  <view class="container">
+    <view class="header">
+      <view class="left-arrow iconfont icon-ico-left-arrow" @tap="preMonth"></view>
+      <view class="right-arrow iconfont icon-icon_left_arrow" @tap="nextMonth"></view>
+      <view class="fl" @tap="showAnaly"><text class="iconfont icon-total fs42"></text></view>
+      <view class="default-account" @tap="showBook">{{ account.accountName }}<text class="iconfont icon-arrow"></text></view>
+      <view class="share-brn fr" @tap="share">共享</view>
+      <image class="userinfo-avatar fr" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
+      <view class="title">
+        <view class="part-view" @tap="showAnaly">  
+          <view class="fs42">{{countData.totalCount}}</view>
+          <view>{{countData.date}} 月结余</view>
+        </view>
+      </view>
+      <view class="title">
+        <view class="part-view" @tap="showAnaly">
+          <view>{{countData.totalInCome}}</view>
+          <view>{{countData.date}} 月收入</view>
+        </view>
+        <view class="part-view" @tap="showAnaly">
+          <view>{{countData.totalSpending}}</view>
+          <view>{{countData.date}} 月支出</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="list">
+      <repeat for="{{bills}}" item="item">
+        <view class="list-title">
+          <view class="title-left">
+            <text>{{item.date}}</text>
+            <text>{{item.week}}</text>
+          </view>
+          <view class="title-right">支出：{{item.totalCount}}</view>
+        </view>
+        <view class="list-item">
+          <repeat for="{{item.list}}" item="col">
+            <view class="list-col" @longpress="remove" @tap="detail({{col.rid}})">
+              <view class="list-each tal">
+                <view class="col-inline"><text class="iconfont icon-{{col.icon}} {{col.icon}} icon-border"></text></view>
+                <view class="col-inline ml30">
+                  <view class="each-title">{{col.title}}</view>
+                  <view class="each-name">{{col.name}}</view>
+                  <view class="each-remark">{{col.remark}}</view>
+                </view>
+              </view>
+              <view class="list-each tar fs42">{{col.total}}</view>
+            </view>
+          </repeat>
+        </view>
+      </repeat>
+    </view>
+
+    <button class="iconfont add-btn icon-add" @tap="addRecord"></button>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import login from 'com/login'
+  import checkLogin from 'com/check-login'
+  import ajax from 'com/ajax'
+
+  const dayMap = ['日', '一', '二', '三', '四', '五', '六']
+
+  export default class Normal extends wepy.page {
+    config = {
+      navigationBarTitleText: '账单'
+    }
+
+    data = {
+      nowTime: null,
+      aid: null,
+      userInfo: {
+        nickName: '加载中...'
+      },
+      pageInfo: {
+        page: 1,
+        isLoading: false
+      },
+      account: {
+        accountName: '默认账单'
+      },
+      countData: {
+        totalCount: 0,
+        totalInCome: 0,
+        totalSpending: 0,
+        date: 1
+      },
+      bills: []
+    }
+
+    methods = {
+      preMonth() {
+        let now = this.nowTime
+        let year = now.getFullYear()
+        let month = now.getMonth() + 1
+        if (month > 1) {
+          this.nowTime = new Date(`${year}-${month - 1}-15`)
+        } else {
+          this.nowTime = new Date(`${year - 1}-${12}-15`)
+        }
+        this.initPage(this.aid)
+      },
+      nextMonth() {
+        let now = this.nowTime
+        let year = now.getFullYear()
+        let month = now.getMonth() + 1
+        if (month < 12) {
+          this.nowTime = new Date(`${year}-${month + 1}-15`)
+        } else {
+          this.nowTime = new Date(`${year + 1}-${1}-15`)
+        }
+        this.initPage(this.aid)
+      },
+      addRecord () {
+        wepy.navigateTo({
+          url: `/pages/bill/add?aid=${this.account.aid}`
+        })
+      },
+      showBook () {
+        wepy.redirectTo({
+          url: '/pages/book/list'
+        })
+      },
+      share () {
+        wepy.navigateTo({
+          url: `/pages/share?aid=${this.account.aid}&access=${this.account.access}`
+        })
+      },
+      showAnaly() {
+        wepy.navigateTo({
+          url: `/pages/analysis/types?aid=${this.account.aid}`
+        })
+      },
+      remove (item) {
+        wepy.showModal({
+          title: '提示',
+          content: `确认删除本条账单吗？`,
+          success: function(res) {
+            if (res.confirm) {
+            } else if (res.cancel) {
+              // todo
+            }
+          }
+        })
+      },
+      detail (rid) {
+        wepy.navigateTo({
+          url: `bill/detail?rid=${rid}`
+        })
+      }
+    }
+
+    // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数
+    events = {}
+
+    gettingAccounts(aid = 0, fromDate, endDate) {
+      return ajax({
+        data: {
+          method: `/account/{uid}/${aid}`,
+          fromDate,
+          endDate
+        }
+      })
+        .then((res) => {
+          const data = res.data.data
+          let countData = {
+            totalSpending: data.outcome.toFixed(2),
+            totalInCome: data.income.toFixed(2),
+            totalCount: (data.income - data.outcome).toFixed(2),
+            date: this.nowTime.getMonth() + 1
+          }
+          this.account = data
+          this.countData = countData
+          return res.data.data
+        })
+    }
+
+    parseRecords(records) {
+      records.forEach((record) => {
+        let date = record.time
+        let week = `星期${dayMap[new Date(date).getDay()]}`
+        let listItem = {
+          rid: record.rid,
+          icon: record.type.code,
+          title: record.type.name,
+          name: record.editer.name,
+          remark: record.note,
+          total: record.amount,
+          type: record.balanceType.toString()
+        }
+        if (this.recordsObj[date]) {
+          this.recordsObj[date].list.push(listItem)
+          this.recordsObj[date].totalCount += (listItem.type === '0' ? -listItem.total : listItem.total)
+        } else {
+          this.recordsObj[date] = {
+            date,
+            week,
+            totalCount: listItem.type === '0' ? -listItem.total : listItem.total,
+            list: [listItem]
+          }
+        }
+      })
+      return this.recordsObj
+    }
+
+    gettingRecords(aid, fromDate, endDate) {
+      return ajax({
+        data: {
+          method: `/records/{uid}/${aid}`,
+          page: this.pageInfo.page,
+          fromDate,
+          endDate
+        }
+      })
+        .then((res) => {
+          const data = res.data.data.data
+          const bills = this.parseRecords(data)
+          this.bills = bills
+        })
+    }
+
+    initPage(aid = 0) {
+      this.recordsObj = {}
+      let now = this.nowTime || new Date()
+      let fromDate = `${now.getFullYear()}-${now.getMonth() + 1}-1`
+      let endDate = `${now.getFullYear()}-${now.getMonth() + 1}-31`
+      this.userInfo = wepy.getStorageSync('userInfo')
+      this.gettingAccounts(aid, fromDate, endDate)
+        .then((res) => {
+          this.gettingRecords(res.aid, fromDate, endDate)
+            .then(() => {
+              this.$apply()
+            })
+        })
+    }
+
+    onShow() {
+      const aid = this.aid
+      checkLogin((uid) => {
+        if (uid) {
+          this.initPage(aid)
+        } else {
+          login()
+            .then((res) => {
+              this.initPage(aid)
+            })
+        }
+      })
+    }
+
+    onLoad(query) {
+      this.aid = query.aid || 0
+      this.nowTime = new Date()
+    }
+
+    onShareAppMessage() {
+      return {
+        title: `${this.userInfo.nickName}邀请你一同记账`,
+        path: `/page/share?source=${wepy.getStorageSync('sessionUid')},${this.account.aid},${+new Date()}`
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  .header {
+    position: relative;
+    padding: 30rpx 12rpx;
+    background-color: #48D1CC;
+    text-align: center;
+    color: #FFF;
+    .left-arrow {
+      position: absolute;
+      font-size: 40rpx;
+      left: 30rpx;
+      top: 200rpx;
+    }
+    .right-arrow {
+      position: absolute;
+      font-size: 40rpx;
+      right: 30rpx;
+      top: 200rpx;
+    }
+    .default-account {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: inline-block;
+      padding: 8rpx 12rpx;
+      font-size: 28rpx;
+      border: 1rpx solid #FFF;
+      border-radius: 20rpx;
+    }
+    .userinfo-avatar {
+      width: 40rpx;
+      height: 40rpx;
+      border-radius: 50%;
+      margin-top: 5rpx;
+      margin-right: 30rpx;
+    }
+    .share-brn {
+      vertical-align: top;
+      font-size: 24rpx;
+      padding: 8rpx;
+    }
+    .title {
+      display: flex;
+      text-align: center;
+      margin-top: 50rpx;
+      font-size: 30rpx;
+      clear: both;
+      &:nth-child(7) {
+        margin-top: 90rpx;
+      }
+      .part-view {
+        flex: 1;
+      }
+    }
+  }
+
+  .list {
+    background-color: #efefef;
+    font-size: 30rpx;
+    .list-title {
+      display: flex;
+      padding: 10rpx 30rpx;
+      font-size: 22rpx;
+      .title-left {
+        flex: 1;
+        text {
+          margin-right: 16rpx;
+        }
+      }
+      .title-right {
+        flex: 1;
+        text-align: right;
+      }
+    }
+    .list-item {
+      background-color: #fff;
+      padding-left: 60rpx;
+      .list-col {
+        border-bottom: 1px solid #efefef;
+        display: flex;
+        padding: 16rpx 60rpx 16rpx 0;
+        align-items: center;
+        &:last-child {
+          border-bottom: none;
+        }
+        .col-inline {
+          display: inline-block;
+          vertical-align: middle;
+        }
+        .list-each {
+          flex: 1;
+        }
+        .each-name, .each-remark {
+          display: inline-block;
+          margin-right: 12rpx;
+          font-size: 24rpx;
+          margin-top: 16rpx;
+        }
+        .each-remark {
+          color: #aaa;
+        }
+      }
+    }
+  }
+</style>

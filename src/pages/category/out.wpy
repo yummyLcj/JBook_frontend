@@ -30,7 +30,7 @@
   import wepy from 'wepy'
   import Toast from 'wepy-com-toast'
 
-  export default class Index extends wepy.page {
+  export default class Out extends wepy.page {
     config = {
       navigationBarTitleText: '添加支出账单分类'
     }

@@ -1,6 +1,7 @@
 import wepy from 'wepy'
 
 const serverUrl = 'http://localhost:3000'
+// const serverUrl = 'http://ss.ylittle.com:3000'
 
 const parseUrl = function (defaultOptions) {
   let url = defaultOptions.url.replace('{uid}', defaultOptions.data.uid)

@@ -32,7 +32,7 @@
   import wepy from 'wepy'
   import Toast from 'wepy-com-toast'
 
-  export default class Index extends wepy.page {
+  export default class List extends wepy.page {
     config = {
       navigationBarTitleText: '更多操作'
     }

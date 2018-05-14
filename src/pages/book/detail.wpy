@@ -13,7 +13,7 @@
   import wepy from 'wepy'
   import Toast from 'wepy-com-toast'
 
-  export default class Index extends wepy.page {
+  export default class Detail extends wepy.page {
     config = {
       navigationBarTitleText: '账本详情'
     }

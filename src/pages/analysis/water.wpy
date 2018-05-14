@@ -1,0 +1,280 @@
+<template>
+  <view>
+    <view class="type-pickers">
+      <text class="type-picker" @tap="changeType">分类</text>
+      <text class="type-picker active">流水</text>
+    </view>
+    <view class="date-range-picker">
+      <picker mode="date" value="{{dates}}" bindchange="dateChange" fields="year">
+        <view class="picker">{{dates}}</view>
+      </picker>
+    </view>
+    <view class="echarts">
+      <echarts :ec.sync="ec" :canvasId.sync="canvasId"/>
+    </view>
+    <view class="flex">
+      <view class="flex1"><text class="cost circle">收入</text></view>
+      <view class="flex1"><text class="income circle">支出</text></view>
+      <view class="flex1"><text class="all circle">结余</text></view>      
+    </view>
+    <view class="flex data-counts">
+      <view class="flex1"><text class="">{{total[0]}}</text></view>
+      <view class="flex1"><text class="">{{total[1]}}</text></view>
+      <view class="flex1"><text class="">{{total[2]}}</text></view>      
+    </view>
+    <view class="items">
+      <view class="flex">
+        <text class="flex1">月</text>
+        <text class="flex1">收入</text>
+        <text class="flex1">支出</text>
+        <text class="flex1">结余</text>
+      </view>
+      <repeat for="{{counts}}" key="index" index="index" item="item">
+        <view class="flex table">
+          <text class="flex1">{{index}}月</text>
+          <text class="flex1">{{item.income}}</text>
+          <text class="flex1">{{item.cost}}</text>
+          <text class="flex1">{{item.total}}</text>
+        </view>
+      </repeat>
+    </view>
+  </view>
+</template>
+
+<style lang="less">
+.data-counts {
+  margin: 20rpx 0;
+}
+.circle {
+  display: inline-block;
+  width: 60rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  text-align: center;
+  font-size: 20rpx;
+  color: #FFF;
+  border-radius: 50%;
+}
+.all {
+  background-color: #48D1CC;
+}
+.cost {
+  background-color: orange;
+}
+.income {
+  background-color: purple;
+}
+.table {
+  padding: 0 20rpx;
+  line-height: 70rpx;
+  border-bottom: 1rpx solid #EEE;
+}
+.flex1 {
+  font-size: 26rpx;
+  text-align: center;
+}
+.type-pickers {
+  margin-left: (750 - 80 * 2) / 2rpx;
+  display: inline-block;
+  height: 50rpx;
+  border: 1rpx solid orange;
+  .type-picker {
+    display: inline-block;
+    vertical-align: top;
+    width: 80rpx;
+    text-align: center;
+    line-height: 50rpx;
+    font-size: 26rpx;
+    &:not(:last-child) {
+      border-right: 1rpx solid orange;
+    }
+    &.active {
+      background: orange;
+      color: white;
+    }
+  }
+}
+.date-range-picker {
+  margin-top: 20rpx;
+  text-align: center;
+  font-size: 28rpx;
+}
+.echarts {
+  width: 750rpx;
+  height: 500rpx;
+}
+.cost-item {
+  width: 750rpx;
+  height: 100rpx;
+  border-bottom: 1rpx solid #EEE;
+  &:first-child {
+    border-top: 1rpx solid #EEE;
+  }
+  .type-icon {
+    display: inline-block;
+    margin: 10rpx;
+    height: 80rpx;
+    width: 80rpx;
+    text-align: center;
+    line-height: 80rpx;
+    font-size: 44rpx;
+    color: #FFF;
+    background-color: orange;
+    border-radius: 50%;
+  }
+  .count-info {
+    display: inline-block;
+    vertical-align: top;
+    width: 450rpx;
+    padding-top: 20rpx;
+    padding-left: 50rpx;
+    .name {
+      font-size: 26rpx;
+    }
+    .count {
+      font-size: 20rpx;
+    }
+  }
+  .count-sum {
+    display: inline-block;
+    width: 100rpx;
+    line-height: 100rpx;
+    font-size: 30rpx;
+    text-align: right;
+  }
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import ajax from 'com/ajax'
+import Echarts from 'ec'
+
+export default class extends wepy.page {
+  components = {
+    echarts: Echarts
+  }
+
+  data = {
+    dates: '',
+    ec: {
+      option: {
+        xAxis: {
+          type: 'category',
+          data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: []
+      }
+    },
+    canvasId: 'canvasId2',
+    counts: [],
+    total: []
+  }
+
+  props = {
+    aid: {
+      type: String,
+      default: 'null'
+    }
+  }
+
+  methods = {
+    dateChange(e) {
+      this.dates = e.detail.value.toString()
+    },
+    changeType() {
+      wepy.redirectTo({
+        url: `/pages/analysis/types?aid=${this.aid}`
+      })
+    }
+  }
+
+  gettingDate(date) {
+    // const that = this
+    date = date || this.dates
+    ajax({
+      data: {
+        date,
+        method: `/analytics/times/${this.aid}`
+      }
+    }).then((res) => {
+      const data = res.data.data
+      let counts = {}
+      data.forEach((item) => {
+        let month = Number.parseInt(item.time.slice(5, 7))
+        if (counts[month]) {
+          // counts[month].push(item)
+          counts[month].total += Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : -item.amountSum).toFixed(2))
+          counts[month].cost += Number.parseFloat((item.balanceType.toString() === '0' ? 0 : item.amountSum).toFixed(2))
+          counts[month].income += Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : 0).toFixed(2))
+        } else {
+          // counts[month] = [item]
+          counts[month] = {
+            total: Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : -item.amountSum).toFixed(2)),
+            cost: Number.parseFloat(((item.balanceType.toString() === '0' ? 0 : item.amountSum).toFixed(2))),
+            income: Number.parseFloat(((item.balanceType.toString() === '0' ? item.amountSum : 0).toFixed(2)))
+          }
+        }
+      })
+      let series = [{
+        data: [], // total
+        type: 'line',
+        lineStyle: {
+          color: '#48D1CC'
+        }
+      }, {
+        data: [], // income
+        type: 'line',
+        lineStyle: {
+          color: 'orange'
+        }
+      }, {
+        data: [], // cost
+        type: 'line',
+        lineStyle: {
+          color: 'purple'
+        }
+      }]
+      let total = [0, 0, 0]
+      for (let i = 1; i < 13; i++) {
+        let tol = (counts[i] && counts[i].total) || 0
+        let income = (counts[i] && counts[i].income) || 0
+        let cost = (counts[i] && counts[i].cost) || 0
+        series[0].data.push(tol.toFixed(2))
+        series[1].data.push(income.toFixed(2))
+        series[2].data.push(cost.toFixed(2))
+        total[0] += income
+        total[1] += cost
+        total[2] += tol
+      }
+      total[0] = total[0].toFixed(2)
+      total[1] = total[1].toFixed(2)
+      total[2] = total[2].toFixed(2)
+      this.ec.option.series = series
+      this.counts = counts
+      this.total = total
+      this.$apply()
+    })
+  }
+
+  watch = {
+    dates(newValue) {
+      if (this.aid === 'null') {
+        return
+      }
+      this.gettingDate(newValue)
+    }
+  }
+
+  onLoad(query) {
+    let date = new Date()
+    let year = date.getFullYear()
+    this.aid = query.aid
+    this.dates = `${year}`
+    this.gettingDate(this.dates)
+  }
+}
+</script>

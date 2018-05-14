@@ -35,7 +35,7 @@
   import Toast from 'wepy-com-toast'
   import ajax from 'com/ajax'
 
-  export default class Index extends wepy.page {
+  export default class Detail extends wepy.page {
     config = {
       navigationBarTitleText: '账单详情'
     }

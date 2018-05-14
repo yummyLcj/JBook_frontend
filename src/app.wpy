@@ -6,6 +6,7 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
+      'pages/normal',
       'pages/bill/add',
       'pages/category/in',
       'pages/book/add',
@@ -14,7 +15,9 @@ export default class extends wepy.app {
       'pages/bill/detail',
       'pages/more/list',
       'pages/category/out',
-      'pages/share'
+      'pages/share',
+      'pages/analysis/types',
+      'pages/analysis/water'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -54,10 +57,17 @@ export default class extends wepy.app {
   .ml30 {
     margin-left: 30rpx;
   }
+  .flex {
+    display: flex;
+  }
+  .flex1 {
+    flex: 1;
+  }
   .icon-border {
     padding: 10rpx;
     font-size: 40rpx;
     color: #fff;
+    background-color: #FFCE40;
     border: 1px solid #fff;
     border-radius: 50%;
   }

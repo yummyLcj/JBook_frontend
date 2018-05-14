@@ -1,0 +1,214 @@
+<template>
+  <view>
+    <view class="type-pickers">
+      <text class="type-picker active">分类</text>
+      <text class="type-picker" @tap="changeType">流水</text>
+    </view>
+    <view class="date-range-picker">
+      <picker mode="date" value="{{date.fromDate}}" bindchange="fromDateChange">
+        <view class="picker">{{date.fromDate}}</view>
+      </picker>
+      <text class="separator">-</text>
+      <picker mode="date" value="{{date.endDate}}" bindchange="endDateChange">
+        <view class="picker">{{date.endDate}}</view>
+      </picker>
+    </view>
+    <view class="echarts">
+      <echarts :ec.sync="ec" :canvasId.sync="canvasId" :handleClick.sync="handlePieClick"/>
+    </view>
+    <view class="items">
+      <repeat for="{{counts}}" key="index" index="index" item="item">
+        <view class="cost-item">
+          <view class="iconfont icon-{{item.type.code}} type-icon"></view>
+          <view class="count-info">
+            <view class="name">{{item.type.name}}</view>
+            <view class="count">{{item.ridCount}}笔</view>
+          </view>
+          <view class="count-sum">
+            {{item.amountSum}}
+          </view>
+        </view>
+      </repeat>
+    </view>
+  </view>
+</template>
+
+<style lang="less">
+.type-pickers {
+  margin-left: (750 - 80 * 2) / 2rpx;
+  display: inline-block;
+  height: 50rpx;
+  border: 1rpx solid orange;
+  .type-picker {
+    display: inline-block;
+    vertical-align: top;
+    width: 80rpx;
+    text-align: center;
+    line-height: 50rpx;
+    font-size: 26rpx;
+    &:not(:last-child) {
+      border-right: 1rpx solid orange;
+    }
+    &.active {
+      background: orange;
+      color: white;
+    }
+  }
+}
+.date-range-picker {
+  margin-top: 20rpx;
+  text-align: center;
+  font-size: 28rpx;
+  .separator {
+    margin: 0 15rpx;
+    display: inline-block;
+  }
+  picker {
+    display: inline-block;
+  }
+}
+.echarts {
+  width: 750rpx;
+  height: 500rpx;
+}
+.cost-item {
+  width: 750rpx;
+  height: 100rpx;
+  border-bottom: 1rpx solid #EEE;
+  &:first-child {
+    border-top: 1rpx solid #EEE;
+  }
+  .type-icon {
+    display: inline-block;
+    margin: 10rpx;
+    height: 80rpx;
+    width: 80rpx;
+    text-align: center;
+    line-height: 80rpx;
+    font-size: 44rpx;
+    color: #FFF;
+    background-color: orange;
+    border-radius: 50%;
+  }
+  .count-info {
+    display: inline-block;
+    vertical-align: top;
+    width: 450rpx;
+    padding-top: 20rpx;
+    padding-left: 50rpx;
+    .name {
+      font-size: 26rpx;
+    }
+    .count {
+      font-size: 20rpx;
+    }
+  }
+  .count-sum {
+    display: inline-block;
+    width: 100rpx;
+    line-height: 100rpx;
+    font-size: 30rpx;
+    text-align: right;
+  }
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import ajax from 'com/ajax'
+import Echarts from 'ec'
+
+export default class extends wepy.page {
+  components = {
+    echarts: Echarts
+  }
+
+  data = {
+    aid: null,
+    date: {
+      fromDate: '',
+      endDate: ''
+    },
+    handlePieClick(e) {
+      // const tid = e.data.id
+    },
+    ec: {
+      option: {
+        backgroundColor: '#ffffff',
+        series: [{
+          type: 'pie',
+          radius: ['50%', '60%'],
+          label: {
+            formatter: '{b}: {d}%',
+            fontSize: 10
+          },
+          data: []
+        }]
+      }
+    },
+    canvasId: 'canvasId1',
+    counts: []
+  }
+
+  methods = {
+    fromDateChange(e) {
+      this.date.fromDate = e.detail.value
+    },
+    endDateChange(e) {
+      this.date.endDate = e.detail.value
+    },
+    changeType() {
+      wepy.redirectTo({
+        url: `/pages/analysis/water?aid=${this.aid}`
+      })
+    }
+  }
+
+  gettingDate(data) {
+    const that = this
+    data.method = `/analytics/types/${this.aid}`
+    ajax({
+      data
+    }).then((res) => {
+      that.ec.option.series[0].data = res.data.data.map((record) => {
+        record.amountSum = record.amountSum.toFixed(2)
+        return {
+          id: record.tid,
+          value: record.ridCount,
+          name: record.type.name
+        }
+      })
+      that.counts = res.data.data
+      that.$apply()
+    })
+  }
+
+  watch = {
+    date(newValue) {
+      if (this.aid === 'null') {
+        return
+      }
+      let data = {
+        fromDate: newValue.fromDate,
+        endDate: newValue.endDate
+      }
+      this.gettingDate(data)
+    }
+  }
+
+  onLoad(query) {
+    let date = new Date()
+    let year = date.getFullYear()
+    let month = `0${date.getMonth() + 1}`.slice(-2)
+    this.aid = query.aid
+    this.date = {
+      fromDate: `${year}-${month}-01`,
+      endDate: `${year}-${month}-31`
+    }
+    this.gettingDate({
+      fromDate: `${year}-${month}-01`,
+      endDate: `${year}-${month}-31`
+    })
+  }
+}
+</script>

@@ -16,7 +16,8 @@ module.exports = {
     alias: {
       '@': path.join(__dirname, 'src'),
       '@@': path.join(__dirname, 'src/font'),
-      'com': path.join(__dirname, 'src/common')
+      'com': path.join(__dirname, 'src/common'),
+      'ec': path.join(__dirname, 'src/components/ec-canvas/ec-echarts')
     },
     aliasFields: ['wepy', 'weapp'],
     modules: ['node_modules']
