@@ -1,30 +1,55 @@
 <template>
   <view class="container">
-    <view class="header">
-      <button size="mini" plain class="{{record.type === 'in' ? 'selected' : ''}}" @tap="changeType('in')">收入</button>
-      <button size="mini" plain class="{{record.type === 'out' ? 'selected': ''}}" @tap="changeType('out')">支出</button>
-    </view>
-
-    <form class="add-form" @submit="save">
-      <view class="add-mount">
-        <view class="add-each tal">
+    <form class="info-form">
+      <view class="info-mount border-solid">
+        <view class="info-each tal">
           <text class="iconfont icon-{{record.icon}} {{record.icon}} icon-border"></text>
           <text class="mr10">{{record.name}}</text>
         </view>
-        <view class="add-each tar">
-          <input class="fs42" type="digit" name="amount" placeholder="0" value="{{record.amount}}" />
+        <view class="info-each tar">
+          <text class="fs42">14.8</text>
         </view>
       </view>
-      <view class="add-mount">
-        <picker class="add-each tal" mode="date" @change="getDate" value="{{record.date}}">
-          <text class="iconfont icon-date fs42"></text>
-          <text class="mr10">{{record.date}}</text>
-        </picker>
-        <view class="add-each tar">
-          <input type="text" name="remark" placeholder="备注" value="{{record.remark}}" />
+      <view class="info-mount">
+        <view class="info-each tal">
+          <text class="iconfont icon-honor icon-border"></text>
+          <text class="mr10">记录人</text>
+        </view>
+        <view class="info-each tar">
+          <text>14.8</text>
         </view>
       </view>
-      <button class="save" formType="submit" loading="{{btnLoading}}">编辑</button>
+      <view class="info-mount">
+        <view class="info-each tal">
+          <text class="iconfont icon-date icon-border"></text>
+          <text class="mr10">时间</text>
+        </view>
+        <view class="info-each tar">
+          <text>14.8</text>
+        </view>
+      </view>
+      <view class="info-mount">
+        <view class="info-each tal">
+          <text class="iconfont icon-book icon-border"></text>
+          <text class="mr10">备注</text>
+        </view>
+        <view class="info-each tar">
+          <text>14.8</text>
+        </view>
+      </view>
+      <view class="inners">
+        <view class="inners-top">
+          <view class="inners-left">参与人</view>
+          <view class="inners-right"><text>{{sum}}人</text></view>
+        </view>
+        <repeat for="{{inners}}" item="item">
+          <view class="inner-item">
+            <view><text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text></view>
+            <view class="inner-name">{{item.name}}</view>
+          </view>
+        </repeat>
+      </view>
+      <button class="save" @tap="detail">编辑</button>
     </form>
     <toast />
   </view>
@@ -52,7 +77,11 @@
         date: '',
         amount: '',
         remark: ''
-      }
+      },
+      sum: 0,
+      inners: [
+        {icon: 'fee', name: 'test'}
+      ]
     }
 
     computed = {
@@ -62,52 +91,15 @@
     }
 
     methods = {
-      addRecord () {
+      infoRecord () {
         wepy.navigateTo({
-          url: 'pages/add'
+          url: 'pages/info'
         })
       },
-      save (e) {
-        const record = this.record
-        const detail = e.detail.value
-        let data = {
-          method: `/record/${record.aid}/${record.rid}`,
-          amount: detail.amount,
-          balanceType: record.type === 'in' ? 0 : 1,
-          tid: record.tid,
-          note: detail.remark,
-          time: record.date
-        }
-        ajax({
-          method: 'put',
-          data
+      detail () {
+        wepy.navigateTo({
+          url: `/pages/bill/detail`
         })
-          .then((res) => {
-            wepy.showToast({
-              title: '保存成功!'
-            })
-            setTimeout(() => {
-              wepy.navigateBack()
-            }, 1000)
-          })
-      },
-      getDate (e) {
-        this.record.date = e.detail.value
-      },
-      changeType (type) {
-        this.record.type = type
-        this.tags = this[type]
-      },
-      changeIcon (item) {
-        if (item.icon !== 'edit') {
-          this.record.icon = item.icon
-          this.record.name = item.name
-        } else {
-          let url = this.record.type === 'in' ? 'in' : 'out'
-          wepy.navigateTo({
-            url: `../category/${url}`
-          })
-        }
       }
     }
 
@@ -143,33 +135,52 @@
 </script>
 
 <style lang="less">
-  .header {
-    box-sizing: border-box;
-    padding: 25rpx 0;
-    height: 100rpx;
-    text-align: center;
-    button {
-      line-height: 50rpx;
-      color: #FF9900;
-      border-radius: 0;
-      border: 1rpx solid #FF9900;
-    }
-    .selected {
-      color: #FFF;
-      background-color: #FF9900;
-    }
-  }
-
-  .add-mount {
+  .info-mount {
     font-size: 30rpx;
     padding: 20rpx 40rpx;
     border-bottom: 1px solid #efefef;
     display: flex;
-    .add-each {
+    .info-each {
       flex: 1;
     }
     &:first-child {
       border-top: 1px solid #efefef;
+    }
+    &.border-solid {
+      border-bottom-style:dashed;
+    }
+  }
+
+  .inners {
+    .inners-top {
+      display: flex;
+      padding: 20rpx 30rpx;
+      border-bottom: 1px solid #ddd;
+      .inners-left {
+        flex: 1;
+        text-align: left;
+      }
+      .inners-right {
+        flex: 1;
+        text-align: right;
+        text {
+          border: 1px solid #FFCE40;
+          font-size: 28rpx;
+          padding:10rpx 20rpx;
+          border-radius:50rpx;
+        }
+      }
+    }
+    .inner-item {
+      display:inline-block;
+      vertical-align:middle;
+      width: 190rpx;
+      margin-top: 30rpx;
+      margin-bottom: 30rpx;
+      text-align: center;
+      .inner-name{
+        margin-top: 10rpx;
+      }
     }
   }
 
