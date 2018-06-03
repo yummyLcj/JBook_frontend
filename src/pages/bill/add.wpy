@@ -34,6 +34,22 @@
         </repeat>
       </view>
 
+      <view class="inners">
+        <view class="inners-top">
+          <view class="inners-left">参与人</view>
+          <view class="inners-right"><text>已选{{sum}}/{{total}}人</text></view>
+        </view>
+        <checkbox-group @change="getInner">
+          <label class="checkbox inners-check" wx:for="{{tags}}" wx:key="item">
+            <checkbox value="{{item.name}}" checked="{{item.checked}}"/>
+            <view class="inners-dib">
+              <text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text>
+              <view class="inners-name">{{item.name}}</view>
+            </view>
+          </label>
+        </checkbox-group>
+      </view>
+
       <button class="save" formType="submit" loading="{{btnLoading}}">保存</button>
     </form>
   </view>
@@ -60,7 +76,9 @@
       },
       in: [],
       out: [],
-      tags: []
+      tags: [],
+      sum: 0,
+      total: 0
     }
 
     computed = {
@@ -92,7 +110,8 @@
             }
           })
           this.in = income
-          this.tags = income
+          this.tags = income || []
+          this.total = this.tags.length
           this.out = outcome
           return [income, outcome]
         })
@@ -147,6 +166,7 @@
       changeType (type) {
         this.record.type = type
         this.tags = this[type]
+        this.total = this.tags.length
       },
       changeIcon (item) {
         if (item.icon !== 'edit') {
@@ -159,6 +179,11 @@
             url: `../category/${url}`
           })
         }
+      },
+      getInner (e) {
+        let val = e.detail.value
+        console.log(val)
+        this.sum = val.length
       }
     }
 
@@ -201,7 +226,7 @@
   .tags {
     padding: 40rpx;
     padding-bottom: 10rpx;
-    margin-bottom: 80rpx;
+    margin-bottom: 30rpx;
     font-size: 24rpx;
     .tag-item {
       display: inline-block;
@@ -218,6 +243,52 @@
     }
     .tag-name {
       margin-top: 20rpx;
+    }
+  }
+
+  .inners {
+    margin-bottom: 80rpx;
+    .inners-top {
+      display: flex;
+      padding: 20rpx 30rpx;
+      border-bottom: 1px solid #ddd;
+      .inners-left {
+        flex: 1;
+        text-align: left;
+      }
+      .inners-right {
+        flex: 1;
+        text-align: right;
+        text {
+          border: 1px solid #FFCE40;
+          font-size: 28rpx;
+          padding:10rpx 20rpx;
+          border-radius:50rpx;
+        }
+      }
+    }
+    .inners-check {
+      display:inline-block;
+      vertical-align:middle;
+      width: 190rpx;
+      margin-right:30rpx;
+      margin-left: 30rpx;
+    }
+    .inners-dib {
+      margin-top: 30rpx;
+      margin-bottom: 30rpx;
+      display:inline-block;
+      vertical-align:middle;
+      margin-left:10rpx;
+      font-size:28rpx;
+      text-align:center;
+      .inners-name {
+        max-width: 106rpx;
+        text-overfloe: ecplise;
+        white-space: nowrap;
+        overflow: hidden;
+        margin-top: 10rpx;
+      }
     }
   }
 

@@ -1,6 +1,6 @@
 import wepy from 'wepy'
 
-const serverUrl = 'http://localhost:3000'
+const serverUrl = 'http://192.168.0.100:3000'
 // const serverUrl = 'http://ss.ylittle.com:3000'
 
 const parseUrl = function (defaultOptions) {
