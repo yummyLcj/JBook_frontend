@@ -117,7 +117,7 @@
       },
       addRecord () {
         wepy.navigateTo({
-          url: `/pages/bill/add?aid=${this.account.aid}`
+          url: `/pages/bill/add?aid=${this.account.aid}&type=${this.account.type}`
         })
       },
       showBook () {

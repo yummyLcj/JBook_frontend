@@ -34,22 +34,23 @@
         </repeat>
       </view>
 
-      <view class="inners">
-        <view class="inners-top">
-          <view class="inners-left">参与人</view>
-          <view class="inners-right"><text>已选{{sum}}/{{total}}人</text></view>
+      <block wx:if="{{type === '0'}}">
+        <view class="inners">
+          <view class="inners-top">
+            <view class="inners-left">参与人</view>
+            <view class="inners-right"><text>已选{{sum}}/{{total}}人</text></view>
+          </view>
+          <checkbox-group @change="getInner">
+            <label class="checkbox inners-check" wx:for="{{tags}}" wx:key="item">
+              <checkbox value="{{item.name}}" checked="{{item.checked}}"/>
+              <view class="inners-dib">
+                <text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text>
+                <view class="inners-name">{{item.name}}</view>
+              </view>
+            </label>
+          </checkbox-group>
         </view>
-        <checkbox-group @change="getInner">
-          <label class="checkbox inners-check" wx:for="{{tags}}" wx:key="item">
-            <checkbox value="{{item.name}}" checked="{{item.checked}}"/>
-            <view class="inners-dib">
-              <text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text>
-              <view class="inners-name">{{item.name}}</view>
-            </view>
-          </label>
-        </checkbox-group>
-      </view>
-
+      </block>
       <button class="save" formType="submit" loading="{{btnLoading}}">保存</button>
     </form>
   </view>
@@ -65,6 +66,7 @@
     }
 
     data = {
+      type: '0',
       record: {
         aid: 0,
         type: 'in',
@@ -118,6 +120,7 @@
     }
 
     onLoad(query) {
+      this.type = query.type
       this.gettingTypes()
         .then((res) => {
           this.record.aid = query.aid
