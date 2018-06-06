@@ -7,25 +7,43 @@
           <text class="mr10">{{record.name}}</text>
         </view>
         <view class="info-each tar">
-          <text class="fs42">14.8</text>
+          <text class="fs42">{{record.amount}}</text>
         </view>
       </view>
       <view class="info-mount">
         <view class="info-each tal">
-          <text class="iconfont icon-honor icon-border"></text>
+          <image src="{{record.creater.avatar}}" class="avatar"/>
           <text class="mr10">记录人</text>
         </view>
         <view class="info-each tar">
-          <text>14.8</text>
+          <text>{{record.creater.name}}</text>
         </view>
       </view>
       <view class="info-mount">
         <view class="info-each tal">
           <text class="iconfont icon-date icon-border"></text>
-          <text class="mr10">时间</text>
+          <text class="mr10">记录时间</text>
         </view>
         <view class="info-each tar">
-          <text>14.8</text>
+          <text>{{record.creater.createdAt}}</text>
+        </view>
+      </view>
+      <view class="info-mount">
+        <view class="info-each tal">
+          <image src="{{record.editer.avatar}}" class="avatar"/>
+          <text class="mr10">最近修改人</text>
+        </view>
+        <view class="info-each tar">
+          <text>{{record.editer.name}}</text>
+        </view>
+      </view>
+      <view class="info-mount">
+        <view class="info-each tal">
+          <text class="iconfont icon-date icon-border"></text>
+          <text class="mr10">修改时间</text>
+        </view>
+        <view class="info-each tar">
+          <text>{{record.editer.createdAt}}</text>
         </view>
       </view>
       <view class="info-mount">
@@ -34,18 +52,18 @@
           <text class="mr10">备注</text>
         </view>
         <view class="info-each tar">
-          <text>14.8</text>
+          <text>{{record.remark}}</text>
         </view>
       </view>
       <view class="inners">
         <view class="inners-top">
           <view class="inners-left">参与人</view>
-          <view class="inners-right"><text>{{sum}}人</text></view>
+          <view class="inners-right"><text>{{users.length}}人</text></view>
         </view>
-        <repeat for="{{inners}}" item="item">
+        <repeat for="{{users}}" item="item">
           <view class="inner-item">
-            <view><text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text></view>
-            <view class="inner-name">{{item.name}}</view>
+            <image src="{{item.user.avatar}}" class="avatar"/>
+            <view class="inner-name">{{item.user.name}}</view>
           </view>
         </repeat>
       </view>
@@ -78,6 +96,10 @@
         amount: '',
         remark: ''
       },
+      rid: '',
+      aid: '',
+      type: '',
+      users: [],
       sum: 0,
       inners: [
         {icon: 'fee', name: 'test'}
@@ -91,16 +113,16 @@
     }
 
     methods = {
-      infoRecord () {
-        wepy.navigateTo({
-          url: 'pages/info'
-        })
-      },
       detail () {
         wepy.navigateTo({
-          url: `/pages/bill/detail`
+          url: `/pages/bill/add?rid=${this.rid}&aid=${this.aid}&type=${this.type}`
         })
       }
+    }
+
+    formartTime(time) {
+      const date = new Date(time)
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
     }
 
     gettingRecord(rid) {
@@ -111,6 +133,8 @@
       })
         .then((res) => {
           const data = res.data.data[0]
+          data.creater.createdAt = this.formartTime(data.creater.createdAt)
+          data.editer.createdAt = this.formartTime(data.editer.createdAt)
           this.record = {
             rid,
             aid: data.aid,
@@ -120,13 +144,21 @@
             tid: data.type.tid,
             date: data.time,
             amount: data.amount,
-            remark: data.note
+            remark: data.note,
+            creater: data.creater,
+            editer: data.editer
           }
+          this.users = res.data.users
         })
     }
 
     onLoad(query) {
-      this.gettingRecord(query.rid)
+      this.rid = query.rid
+      this.aid = query.aid
+      this.type = query.type
+      this.gettingRecord(query.rid).then(() => {
+        this.$apply()
+      })
     }
 
     // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数
@@ -142,6 +174,12 @@
     display: flex;
     .info-each {
       flex: 1;
+      .avatar {
+        width: 66rpx;
+        height: 66rpx;
+        vertical-align: middle;
+        border-radius: 33rpx;
+      }
     }
     &:first-child {
       border-top: 1px solid #efefef;
@@ -178,6 +216,11 @@
       margin-top: 30rpx;
       margin-bottom: 30rpx;
       text-align: center;
+      .avatar {
+        width: 80rpx;
+        height: 80rpx;
+        border-radius: 50%;
+      }
       .inner-name{
         margin-top: 10rpx;
       }

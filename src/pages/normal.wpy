@@ -180,7 +180,7 @@
       },
       detail (rid) {
         wepy.navigateTo({
-          url: `bill/detail?rid=${rid}`
+          url: `bill/detail?rid=${rid}&aid=${this.account.aid}&type=${this.account.type}`
         })
       }
     }

@@ -5,7 +5,7 @@
       <button size="mini" plain class="{{record.type === 'out' ? 'selected': ''}}" @tap="changeType('out')">支出</button>
     </view>
 
-    <form class="add-form" @submit="save">
+    <form class="add-form" @submit="submit">
       <view class="add-mount">
         <view class="add-each tal">
           <text class="iconfont icon-{{record.icon}} {{record.icon}} icon-border"></text>
@@ -34,17 +34,17 @@
         </repeat>
       </view>
 
-      <block wx:if="{{type === '0'}}">
+      <block wx:if="{{type === '1'}}">
         <view class="inners">
           <view class="inners-top">
             <view class="inners-left">参与人</view>
             <view class="inners-right"><text>已选{{sum}}/{{total}}人</text></view>
           </view>
           <checkbox-group @change="getInner">
-            <label class="checkbox inners-check" wx:for="{{tags}}" wx:key="item">
-              <checkbox value="{{item.name}}" checked="{{item.checked}}"/>
+            <label class="checkbox inners-check" wx:for="{{users}}" wx:key="item">
+              <checkbox value="{{item.uid}}" checked="{{item.checked}}"/>
               <view class="inners-dib">
-                <text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text>
+                <image src="{{item.avatar}}" class="avatar"/>
                 <view class="inners-name">{{item.name}}</view>
               </view>
             </label>
@@ -76,6 +76,9 @@
         amount: '',
         remark: ''
       },
+      rid: '',
+      users: [],
+      selectedUsers: [],
       in: [],
       out: [],
       tags: [],
@@ -94,42 +97,146 @@
         data: {
           method: '/types/{uid}'
         }
-      })
-        .then((res) => {
-          let income = []
-          let outcome = []
-          res.data.data.forEach(({type}) => {
-            let yinfo = {
-              tid: type.tid,
-              type: type.type === 0 ? 'in' : 'out',
-              name: type.name,
-              icon: type.code
-            }
-            if (type.type === 0) {
-              income.push(yinfo)
-            } else {
-              outcome.push(yinfo)
-            }
-          })
-          this.in = income
-          this.tags = income || []
-          this.total = this.tags.length
-          this.out = outcome
-          return [income, outcome]
+      }).then((res) => {
+        let income = []
+        let outcome = []
+        res.data.data.forEach(({type}) => {
+          let yinfo = {
+            tid: type.tid,
+            type: type.type === 0 ? 'in' : 'out',
+            name: type.name,
+            icon: type.code
+          }
+          if (type.type === 0) {
+            income.push(yinfo)
+          } else {
+            outcome.push(yinfo)
+          }
         })
+        this.in = income
+        this.tags = income || []
+        this.total = this.tags.length
+        this.out = outcome
+        return [income, outcome]
+      })
+    }
+
+    gettingUsers(aid) {
+      return ajax({
+        data: {
+          method: '/session/account',
+          aid
+        }
+      }).then((res) => {
+        const users = res.data.users.map((account) => account.user) || []
+        this.users = users
+        return users
+      })
+    }
+
+    gettingDetail(rid) {
+      return ajax({
+        data: {
+          method: `/record/${rid}`
+        }
+      }).then((res) => {
+        const data = res.data.data[0]
+        const selectedUsers = res.data.users.map((account) => account.user.uid)
+        const record = this.record
+        record.type = data.balanceType === 0 ? 'in' : 'out'
+        console.log(data)
+        record.icon = data.type.code
+        record.name = data.type.name
+        record.date = data.time
+        record.amount = data.amount
+        record.remark = data.note
+        this.record = record
+        const users = this.users
+        users.forEach((user) => {
+          if (selectedUsers.indexOf(user.uid) > -1) {
+            user.checked = true
+          }
+        })
+        this.selectedUsers = selectedUsers
+        this.users = users
+      })
     }
 
     onLoad(query) {
       this.type = query.type
-      this.gettingTypes()
+      this.gettingTypes().then((res) => {
+        this.record.aid = query.aid
+        this.record.tid = res[0][0].tid
+        this.record.icon = res[0][0].icon
+        this.record.name = res[0][0].name
+        const now = new Date()
+        this.record.date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`
+        this.$apply()
+      })
+      this.gettingUsers(query.aid).then((users) => {
+        const rid = query.rid || 0
+        if (rid) {
+          this.rid = rid
+          this.gettingDetail(rid).then((res) => {
+            this.$apply()
+          })
+        }
+      })
+    }
+
+    save (e) {
+      const record = this.record
+      const detail = e.detail.value
+      let data = {
+        method: `/record/{uid}/${record.aid}`,
+        amount: detail.amount,
+        balanceType: record.type === 'in' ? 0 : 1,
+        tid: record.tid,
+        note: detail.remark,
+        time: record.date
+      }
+      if (this.type === '1') {
+        data.uids = this.selectedUsers.length ? this.selectedUsers : false
+      }
+      ajax({
+        method: 'post',
+        data
+      })
         .then((res) => {
-          this.record.aid = query.aid
-          this.record.tid = res[0][0].tid
-          this.record.icon = res[0][0].icon
-          this.record.name = res[0][0].name
-          const now = new Date()
-          this.record.date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`
-          this.$apply()
+          wepy.showToast({
+            title: '保存成功!'
+          })
+          setTimeout(() => {
+            wepy.navigateBack()
+          }, 1000)
+        })
+    }
+
+    update (e) {
+      const record = this.record
+      const detail = e.detail.value
+      let data = {
+        method: `/record/${record.aid}/${this.rid}`,
+        amount: detail.amount,
+        balanceType: record.type === 'in' ? 0 : 1,
+        tid: record.tid,
+        note: detail.remark,
+        time: record.date
+      }
+      if (this.type === '1') {
+        data.uids = this.selectedUsers.length ? this.selectedUsers : false
+      }
+      ajax({
+        method: 'put',
+        data
+      })
+        .then((res) => {
+          wepy.showToast({
+            title: '保存成功!'
+          })
+          setTimeout(() => {
+            wepy.navigateBack()
+          }, 1000)
         })
     }
 
@@ -139,29 +246,12 @@
           url: 'pages/add'
         })
       },
-      save (e) {
-        const record = this.record
-        const detail = e.detail.value
-        let data = {
-          method: `/record/{uid}/${record.aid}`,
-          amount: detail.amount,
-          balanceType: record.type === 'in' ? 0 : 1,
-          tid: record.tid,
-          note: detail.remark,
-          time: record.date
+      submit(e) {
+        if (this.rid) {
+          this.update(e)
+        } else {
+          this.save(e)
         }
-        ajax({
-          method: 'post',
-          data
-        })
-          .then((res) => {
-            wepy.showToast({
-              title: '保存成功!'
-            })
-            setTimeout(() => {
-              wepy.navigateBack()
-            }, 1000)
-          })
       },
       getDate (e) {
         this.record.date = e.detail.value
@@ -185,8 +275,7 @@
       },
       getInner (e) {
         let val = e.detail.value
-        console.log(val)
-        this.sum = val.length
+        this.selectedUsers = val
       }
     }
 
@@ -287,10 +376,15 @@
       text-align:center;
       .inners-name {
         max-width: 106rpx;
-        text-overfloe: ecplise;
+        text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
         margin-top: 10rpx;
+      }
+      .avatar {
+        display: inline-block;
+        width: 80rpx;
+        height: 80rpx;
       }
     }
   }
