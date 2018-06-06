@@ -4,7 +4,7 @@
       <view class="left-arrow iconfont icon-ico-left-arrow" @tap="preMonth"></view>
       <view class="right-arrow iconfont icon-icon_left_arrow" @tap="nextMonth"></view>
       <view class="fl" @tap="showAnaly"><text class="iconfont icon-total fs42"></text></view>
-      <view class="default-account" @tap="showBook">{{ account.accountName }}<text class="iconfont icon-arrow"></text></view>
+      <view class="default-account" @tap="showBook(account.accountName)">{{ account.accountName }}<text class="iconfont icon-arrow"></text></view>
       <view class="share-brn fr" @tap="share">更多</view>
       <image class="userinfo-avatar fr" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
       <view class="title">
@@ -120,9 +120,9 @@
           url: `/pages/bill/add?aid=${this.account.aid}&type=${this.account.type}`
         })
       },
-      showBook () {
+      showBook (name) {
         wepy.redirectTo({
-          url: '/pages/book/list'
+          url: `/pages/book/list?book=${name}`
         })
       },
       share () {

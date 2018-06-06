@@ -146,7 +146,7 @@
     &:last-child {
       .icon-border {
         color: #ddd;
-        border: 1 px dashed #ddd;
+        border: 1px dashed #ddd;
       }
     }
     .tag-name {

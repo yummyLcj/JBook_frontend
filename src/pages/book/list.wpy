@@ -64,7 +64,7 @@
       }
     }
 
-    gettingAccounts() {
+    gettingAccounts(name) {
       return ajax({
         data: {
           method: '/accounts/{uid}'
@@ -86,7 +86,8 @@
             access: account.access,
             title: account.type === 1 ? '日常' : 'AA',
             member: memberCount[account.aid] || 0,
-            total: recordCount[account.aid] || 0
+            total: recordCount[account.aid] || 0,
+            active: account.account.accountName === name ? 'active' : 'inactive'
           }
           accounts[0].list.push(item)
         })
@@ -96,7 +97,7 @@
     }
 
     onLoad(opt) {
-      this.gettingAccounts()
+      this.gettingAccounts(opt.book)
     }
   }
 </script>
