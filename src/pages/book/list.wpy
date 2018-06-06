@@ -74,22 +74,30 @@
           {
             type: '账本',
             list: []
+          },
+          {
+            type: '圈子',
+            list: []
           }
         ]
         const memberCount = res.data.memberCount
         const recordCount = res.data.recordCount
         res.data.data.forEach((account) => {
           let item = {
-            icon: 'book',
+            icon: account.account.type === 1 ? 'circle' : 'book',
             name: account.account.accountName,
             aid: account.aid,
             access: account.access,
-            title: account.type === 1 ? '日常' : 'AA',
+            title: account.account.type === 1 ? 'AA' : '日常',
             member: memberCount[account.aid] || 0,
             total: recordCount[account.aid] || 0,
             active: account.account.accountName === name ? 'active' : 'inactive'
           }
-          accounts[0].list.push(item)
+          if (account.account.type === 1) {
+            accounts[1].list.push(item)
+          } else {
+            accounts[0].list.push(item)
+          }
         })
         this.books = accounts
         this.$apply()
