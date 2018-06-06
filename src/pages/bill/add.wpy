@@ -115,7 +115,6 @@
         })
         this.in = income
         this.tags = income || []
-        this.total = this.tags.length
         this.out = outcome
         return [income, outcome]
       })
@@ -129,6 +128,7 @@
         }
       }).then((res) => {
         const users = res.data.users.map((account) => account.user) || []
+        this.total = users.length
         this.users = users
         return users
       })

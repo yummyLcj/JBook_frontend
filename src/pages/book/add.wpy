@@ -12,8 +12,8 @@
         <view class="add-each tar">
           <radio-group class="radio-group" bindchange="radioChange">
             <label class="radio">
-              <radio value="账本" checked="{{true}}"/>账本
-              <radio value="圈子" checked="{{false}}"/>圈子
+              <radio value="0" checked="{{true}}"/>账本
+              <radio value="1" checked="{{false}}"/>圈子
             </label>
           </radio-group>
         </view>
@@ -45,7 +45,6 @@
         this.book.type = e.detail.value
       },
       save (e) {
-        console.log(e.detail.value, this.book)
         let data = {
           method: '/account/{uid}',
           accountName: e.detail.value.name,
