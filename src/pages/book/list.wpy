@@ -35,7 +35,8 @@
     }
 
     data = {
-      books: []
+      books: [],
+      book: ''
     }
 
     methods = {
@@ -96,8 +97,13 @@
       })
     }
 
+    onShow() {
+      this.gettingAccounts(this.book)
+    }
+
     onLoad(opt) {
-      this.gettingAccounts(opt.book)
+      this.book = opt.book
+      // this.gettingAccounts(opt.book)
     }
   }
 </script>
