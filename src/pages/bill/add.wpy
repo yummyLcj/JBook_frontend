@@ -113,9 +113,9 @@
             outcome.push(yinfo)
           }
         })
-        this.in = income
+        this.in = income.concat({icon: 'edit', name: '自定义'})
         this.tags = income || []
-        this.out = outcome
+        this.out = outcome.concat({icon: 'edit', name: '自定义'})
         return [income, outcome]
       })
     }
@@ -128,8 +128,8 @@
         }
       }).then((res) => {
         const users = res.data.users.map((account) => account.user) || []
-        this.total = users.length
         this.users = users
+        this.total = this.users.length
         return users
       })
     }
@@ -259,7 +259,6 @@
       changeType (type) {
         this.record.type = type
         this.tags = this[type]
-        this.total = this.tags.length
       },
       changeIcon (item) {
         if (item.icon !== 'edit') {
