@@ -6,7 +6,7 @@
           <text class="iconfont icon-{{type.icon}} {{type.icon}} icon-border"></text>
         </view>
         <view class="add-each tar">
-          <input type="text" name="name" placeholder="请输入分类名称" value="{{type.name}}" />
+          <input type="text" name="name" placeholder="请输入分类名称" value="{{type.name}}" bindinput="bindInput"/>
         </view>
       </view>
     </view>
@@ -14,10 +14,9 @@
     <view class="tag-tip">请选择图标</view>
 
     <view class="tags">
-      <repeat for="{{tags}}" item="item">
+      <repeat for="{{icons}}" item="item">
         <view class="tag-item" @tap="changeIcon({{item}})">
-          <view><text class="iconfont icon-{{item.icon}} {{item.icon}} icon-border"></text></view>
-          <view class="tag-name">{{item.name}}</view>
+          <view><text class="iconfont icon-{{item}} {{item}} icon-border"></text></view>
         </view>
       </repeat>
     </view>
@@ -28,76 +27,65 @@
 
 <script>
   import wepy from 'wepy'
-  import Toast from 'wepy-com-toast'
+  import ajax from 'com/ajax'
 
   export default class In extends wepy.page {
     config = {
       navigationBarTitleText: '添加收入账单分类'
     }
 
-    components = {
-      toast: Toast
-    }
-
     data = {
-      userInfo: {
-        nickName: '加载中...'
-      },
       type: {
-        icon: 'fee',
+        icon: '',
         name: ''
       },
-      tags: [
-        {
-          icon: 'honor',
-          name: '投资'
-        },
-        {
-          icon: 'dollar',
-          name: '收入'
-        },
-        {
-          icon: 'earn',
-          name: '收款'
-        },
-        {
-          icon: 'money',
-          name: '奖金'
-        },
-        {
-          icon: 'fee',
-          name: '工资'
-        },
-        {
-          icon: 'pocket',
-          name: '红包'
-        }
-      ]
-    }
-
-    computed = {
-      now () {
-        return +new Date()
-      }
+      icons: []
     }
 
     methods = {
       changeIcon (item) {
-        this.type.icon = item.icon
+        this.type.icon = item
       },
       bindInput (e) {
         this.type.name = e.detail.value
       },
       save (e) {
-        console.log(e.detail.value, this.type)
+        ajax({
+          data: {
+            method: '/type/{uid}',
+            name: this.type.name,
+            code: this.type.icon,
+            type: 0
+          },
+          method: 'post'
+        }).then((res) => {
+          wepy.showToast({
+            title: '保存成功!'
+          })
+          setTimeout(() => {
+            wepy.navigateBack()
+          }, 1000)
+        })
       }
     }
 
-    // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数
-    events = {}
+    gettingTypes() {
+      return ajax({
+        data: {
+          method: '/types/{uid}'
+        }
+      }).then((res) => {
+        const icons = res.data.data.map(type => type.type.code)
+        this.type.icon = icons[0]
+        this.icons = icons
+        return icons
+      })
+    }
 
     onLoad(opt) {
-      // todo
+      this.gettingTypes().then(() => {
+        this.$apply()
+      })
     }
   }
 </script>

@@ -12,7 +12,7 @@
           <text class="mr10">{{record.name}}</text>
         </view>
         <view class="add-each tar">
-          <input class="fs42" type="digit" name="amount" placeholder="0" value="{{record.amount}}"/>
+          <input class="fs42" type="digit" name="amount" placeholder="0" value="{{record.amount}}" bindinput="chanageAmount"/>
         </view>
       </view>
       <view class="add-mount">
@@ -21,7 +21,7 @@
           <text class="mr10">{{record.date}}</text>
         </picker>
         <view class="add-each tar">
-          <input type="text" name="remark" placeholder="备注" value="{{record.remark}}"/>
+          <input type="text" name="remark" placeholder="备注" value="{{record.remark}}" bindinput="chanageRemark"/>
         </view>
       </view>
 
@@ -113,9 +113,11 @@
             outcome.push(yinfo)
           }
         })
-        this.in = income.concat({icon: 'edit', name: '自定义'})
+        income.push({icon: 'edit', name: '自定义'})
+        outcome.push({icon: 'edit', name: '自定义'})
+        this.in = income
         this.tags = income || []
-        this.out = outcome.concat({icon: 'edit', name: '自定义'})
+        this.out = outcome
         return [income, outcome]
       })
     }
@@ -144,7 +146,6 @@
         const selectedUsers = res.data.users.map((account) => account.user.uid)
         const record = this.record
         record.type = data.balanceType === 0 ? 'in' : 'out'
-        console.log(data)
         record.icon = data.type.code
         record.name = data.type.name
         record.date = data.time
@@ -162,10 +163,8 @@
       })
     }
 
-    onLoad(query) {
-      this.type = query.type
+    onShow() {
       this.gettingTypes().then((res) => {
-        this.record.aid = query.aid
         this.record.tid = res[0][0].tid
         this.record.icon = res[0][0].icon
         this.record.name = res[0][0].name
@@ -173,6 +172,11 @@
         this.record.date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`
         this.$apply()
       })
+    }
+
+    onLoad(query) {
+      this.type = query.type
+      this.record.aid = query.aid
       this.gettingUsers(query.aid).then((users) => {
         const rid = query.rid || 0
         if (rid) {
@@ -271,6 +275,12 @@
             url: `../category/${url}`
           })
         }
+      },
+      chanageAmount(e) {
+        this.record.amount = e.detail.value
+      },
+      chanageRemark(e) {
+        this.record.remark = e.detail.value
       },
       getInner (e) {
         let val = e.detail.value

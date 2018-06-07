@@ -55,6 +55,7 @@
           <text>{{record.remark}}</text>
         </view>
       </view>
+      <block wx:if="{{type==='1'}}">
       <view class="inners">
         <view class="inners-top">
           <view class="inners-left">参与人</view>
@@ -67,6 +68,7 @@
           </view>
         </repeat>
       </view>
+      </block>
       <button class="save" @tap="detail">编辑</button>
     </form>
     <toast />
