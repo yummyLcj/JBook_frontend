@@ -56,6 +56,15 @@
         </view>
       </view>
       <block wx:if="{{type==='1'}}">
+      <view class="info-mount">
+      <view class="info-each tal">
+        <text class="iconfont icon-{{record.icon}} {{record.icon}} icon-border"></text>
+        <text class="mr10">AA金额</text>
+      </view>
+      <view class="info-each tar">
+        <text>{{record.amount / users.length}}</text>
+      </view>
+    </view>
       <view class="inners">
         <view class="inners-top">
           <view class="inners-left">参与人</view>
@@ -169,6 +178,10 @@
 </script>
 
 <style lang="less">
+  .iconfont {
+    color: #000;
+    background: transparent;
+  }
   .info-mount {
     font-size: 30rpx;
     padding: 20rpx 40rpx;

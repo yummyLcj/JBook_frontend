@@ -24,6 +24,25 @@
           <input type="text" name="remark" placeholder="备注" value="{{record.remark}}" bindinput="chanageRemark"/>
         </view>
       </view>
+      <view class="add-mount" @tap="openPicker">
+        <text class="mr10">周期账单</text>
+        <text class="circle-note add-each">{{circleTime.new}} {{['年', '月', '日'][circleType.new]}}</text>
+      </view>
+
+      <view class="circle-picker-container" style="visibility:{{circleHidden ? 'hidden' : 'visible'}}">
+        <view class="top-btn">
+          <p class="circle-cancel" @tap="cancelCircle()">取消</p>
+          <p class="circle-ensure" @tap="ensureCircle()">确认</p>
+        </view>
+        <picker-view indicator-style="height: 50rpx;" bindchange="changeCircle" value="111111" class="circle-picker">
+          <picker-view-column>
+            <view wx:for="{{circleTimes}}" style="line-height:50rpx;height:50rpx;">{{item}}</view>
+          </picker-view-column>
+          <picker-view-column>
+            <view wx:for="{{circleTypes}}" style="line-height:50rpx;height:50rpx;">{{['年', '月', '日'][item]}}</view>
+          </picker-view-column>
+        </picker-view>
+      </view>
 
       <view class="tags">
         <repeat for="{{tags}}" item="item">
@@ -83,7 +102,18 @@
       out: [],
       tags: [],
       sum: 0,
-      total: 0
+      total: 0,
+      circleHidden: true,
+      circleTime: {
+        tem: '',
+        new: ''
+      },
+      circleType: {
+        tem: '',
+        new: ''
+      },
+      circleTimes: new Array(31).fill(1).map((item, index) => index + 1),
+      circleTypes: [0, 1, 2]  // 0-年 1-月 2-日
     }
 
     computed = {
@@ -197,7 +227,9 @@
         balanceType: record.type === 'in' ? 0 : 1,
         tid: record.tid,
         note: detail.remark,
-        time: record.date
+        time: record.date,
+        circleTime: this.circleTime.new || 0,
+        circleType: this.circleTime.new || 0
       }
       if (this.type === '1') {
         data.uids = this.selectedUsers.length ? this.selectedUsers : false
@@ -285,15 +317,77 @@
       getInner (e) {
         let val = e.detail.value
         this.selectedUsers = val
+      },
+      changeCircle(e) {
+        const detail = e.detail.value
+        const circleTime = {
+          tem: this.circleTimes[detail[0]],
+          new: this.circleTime.new
+        }
+        const circleType = {
+          tem: this.circleTypes[detail[1]],
+          new: this.circleTime.new
+        }
+        this.circleTime = circleTime
+        this.circleType = circleType
       }
     }
 
     // 存放响应组件之间通过$broadcast、$emit、$invoke所传递的事件的函数
     events = {}
+    openPicker(e) {
+      this.circleHidden = false
+    }
+    ensureCircle() {
+      const circleTime = {
+        tem: '',
+        new: this.circleTime.tem
+      }
+      const circleType = {
+        tem: '',
+        new: this.circleType.tem
+      }
+      this.circleTime = circleTime
+      this.circleType = circleType
+      this.circleHidden = true
+    }
+    cancelCircle() {
+      this.circleHidden = true
+    }
   }
 </script>
 
 <style lang="less">
+  .circle-picker-container {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    z-index: 3;
+    background-color: #FFF;
+    .circle-picker {
+      width: 750rpx;
+      height: 400rpx;
+    }
+    .top-btn {
+      border-top: 1rpx solid #ddd;
+      border-bottom: 1rpx solid #ddd;
+      padding: 20rpx 0;
+      &::after {
+        content: '';
+        width: 0;
+        height: 0;
+        clear: both;
+      }
+    }
+    .circle-cancel {
+      margin-left: 40rpx;
+    }
+    .circle-ensure {
+      float: right;
+      margin-right: 40rpx;
+      color: #48D1CC;
+    }
+  }
   .header {
     box-sizing: border-box;
     padding: 25rpx 0;
@@ -321,6 +415,9 @@
     }
     &:first-child {
       border-top: 1px solid #efefef;
+    }
+    .circle-note {
+      text-align: right;
     }
   }
 
