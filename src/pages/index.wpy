@@ -17,6 +17,7 @@ export default class Index extends wepy.page {
         })
       } else {
         const userInfo = e.detail ? e.detail.userInfo : {}
+        userInfo.avatarUrl = userInfo.avatarUrl || 'https://imgsrc.baidu.com/forum/w=580/sign=1588b7c5d739b6004dce0fbfd9503526/7bec54e736d12f2eb97e1a464dc2d56285356898.jpg'
         login(userInfo).then((res) => {
           if (res.data.success) {
             wepy.redirectTo({

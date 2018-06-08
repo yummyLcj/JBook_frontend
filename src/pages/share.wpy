@@ -2,7 +2,7 @@
 <view>
   <view wx:if="{{aid}}">
     <block wx:for="{{members}}">
-      <view class="user" @tap="changeAccess" data-uid="{{item.uid}}">
+      <view class="user" @tap="changeAccess" data-uid="{{item.uid}}" data-access="{{item.accessNum}}">
         <image src="{{item.user.avatar}}" class="user-avatar"/>
         <view class="user-info">
           <view class="user-name">{{item.user.name}}</view>
@@ -112,7 +112,10 @@
       this.userInfo = userInfo
       wepy.showModal({
         content: '是否加入账本',
-        success: () => {
+        success: (res) => {
+          if (!res.confirm) {
+            return
+          }
           checkLogin((uid) => {
             if (uid) {
               this.addAccount(this.source)
@@ -140,6 +143,7 @@
         const data = res.data.data
         const access = ['拥有者', '管理员', '成员', '游客']
         data.forEach(ele => {
+          ele.accessNum = ele.access
           ele.access = access[ele.access]
         })
         this.members = res.data.data
@@ -167,22 +171,25 @@
     onShareAppMessage() {
       return {
         title: `${wepy.getStorageSync('userInfo').name}邀请你一同记账`,
-        path: `/page/share?source={uid},${this.aid},${this.accessType},${+new Date()}`
+        path: `/pages/share?source={uid},${this.aid},${this.accessType},${+new Date()}`
       }
     }
 
     changeAccess(e) {
       const uid = e.currentTarget.dataset.uid
+      const originAccess = e.currentTarget.dataset.access
       const that = this
       const access = ['管理权限', '编辑权限', '只读权限']
       wepy.showModal({
         title: '是否需要修改权限',
-        success() {
+        success(res) {
+          if (!res.confirm) {
+            return
+          }
           wepy.showActionSheet({
             itemList: access,
             success(res) {
-              console.log(res.tapIndex, that.selfAccess)
-              if (res.tapIndex + 1 <= that.selfAccess) {
+              if (res.tapIndex + 1 <= that.selfAccess || that.selfAccess <= originAccess) {
                 wepy.showToast({
                   title: '权限不足！',
                   icon: 'none'

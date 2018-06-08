@@ -1,9 +1,10 @@
 const path = require('path');
-var prod = process.env.NODE_ENV === 'production';
+// var prod = process.env.NODE_ENV === 'production';
+var prod = true
 
 module.exports = {
   wpyExt: '.wpy',
-  eslint: true,
+  eslint: false,
   cliLogs: !prod,
   build: {
     web: {

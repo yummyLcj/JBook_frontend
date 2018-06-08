@@ -307,10 +307,13 @@
         this.tags = this[type]
       },
       changeIcon (item) {
+        console.log(this.record)
         if (item.icon !== 'edit') {
-          this.record.icon = item.icon
-          this.record.name = item.name
-          this.record.tid = item.tid
+          const record = this.record
+          record.icon = item.icon
+          record.name = item.name
+          record.tid = item.tid
+          this.record = record
         } else {
           let url = this.record.type === 'in' ? 'in' : 'out'
           wepy.navigateTo({
