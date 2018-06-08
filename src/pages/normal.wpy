@@ -127,7 +127,7 @@
       },
       share () {
         wepy.showActionSheet({
-          itemList: ['共享', '备份到本地', '从本地备份'],
+          itemList: ['共享', '备份到本地', '从剪贴板中备份'],
           success: (res) => {
             switch (res.tapIndex) {
               case 0:
@@ -141,20 +141,37 @@
                     method: `/bak/${this.account.aid}`
                   }
                 }).then((res) => {
+                  const url = res.data
                   wepy.showModal({
-                    content: `访问${res.data}下载文件!`,
+                    content: `访问${url}下载文件!`,
                     confirmText: '复制网址',
                     success() {
                       wepy.setClipboardData({
-                        data: res.data,
+                        data: url,
                         success() {
                           wepy.showToast({
-                            title: '复制成功!'
+                            title: '复制成功!请保存好网址！'
                           })
                         }
                       })
                     }
                   })
+                })
+                break
+              case 2:
+                wepy.getClipboardData({
+                  success: (res) => {
+                    const url = res.data
+                    ajax({
+                      data: {
+                        method: `/bak/${this.account.aid}`,
+                        url: url
+                      },
+                      method: 'post'
+                    }).then((res) => {
+                      console.log(res)
+                    })
+                  }
                 })
                 break
             }
