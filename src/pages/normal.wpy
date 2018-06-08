@@ -1,5 +1,5 @@
 <template>
-  <view class="container">
+  <scroll-view class="container" scroll-y bindscrolltolower="nextPage">
     <view class="header">
       <view class="left-arrow iconfont icon-ico-left-arrow" @tap="preMonth"></view>
       <view class="right-arrow iconfont icon-icon_left_arrow" @tap="nextMonth"></view>
@@ -54,7 +54,7 @@
 
     <button class="iconfont add-btn icon-add" @tap="addRecord"></button>
 
-  </view>
+  </scroll-view>
 </template>
 
 <script>
@@ -78,7 +78,8 @@
       },
       pageInfo: {
         page: 1,
-        isLoading: false
+        isLoading: false,
+        hasMore: true
       },
       account: {
         accountName: '默认账单'
@@ -228,6 +229,7 @@
     }
 
     parseRecords(records) {
+      const recordsObj = this.recordsObj
       records.forEach((record) => {
         let date = record.time
         let week = `星期${dayMap[new Date(date).getDay()]}`
@@ -240,11 +242,11 @@
           total: record.amount,
           type: record.balanceType.toString()
         }
-        if (this.recordsObj[date]) {
-          this.recordsObj[date].list.push(listItem)
-          this.recordsObj[date].totalCount += (listItem.type === '0' ? -listItem.total : listItem.total)
+        if (recordsObj[date]) {
+          recordsObj[date].list.push(listItem)
+          recordsObj[date].totalCount -= (listItem.type === '0' ? listItem.total : -listItem.total)
         } else {
-          this.recordsObj[date] = {
+          recordsObj[date] = {
             date,
             week,
             totalCount: listItem.type === '0' ? -listItem.total : listItem.total,
@@ -252,10 +254,34 @@
           }
         }
       })
-      return this.recordsObj
+      const keys = Object.keys(recordsObj)
+      keys.forEach(key => {
+        if (typeof recordsObj[key].totalCount.toFixed === 'function') {
+          recordsObj[key].totalCount = recordsObj[key].totalCount.toFixed(2)
+        }
+      })
+      this.recordsObj = recordsObj
+      return recordsObj
+    }
+
+    nextPage() {
+      const pageInfo = this.pageInfo
+      if (!pageInfo.hasMore || pageInfo.isLoading) {
+        return false
+      }
+      let now = this.nowTime || new Date()
+      let fromDate = `${now.getFullYear()}-${now.getMonth() + 1}-1`
+      let endDate = `${now.getFullYear()}-${now.getMonth() + 1}-31`
+      this.gettingRecords(this.account.aid, fromDate, endDate).then(() => {
+        this.$apply()
+      })
+      return true
     }
 
     gettingRecords(aid, fromDate, endDate) {
+      const pageInfo = this.pageInfo
+      pageInfo.isLoading = true
+      this.pageInfo = pageInfo
       return ajax({
         data: {
           method: `/records/{uid}/${aid}`,
@@ -267,6 +293,12 @@
         .then((res) => {
           const data = res.data.data.data
           const bills = this.parseRecords(data)
+          const pageInfo = {
+            isLoading: false,
+            page: parseInt(res.data.data.page) + 1,
+            hasMore: !!data.length
+          }
+          this.pageInfo = pageInfo
           this.bills = bills
         })
     }
@@ -315,6 +347,12 @@
 </script>
 
 <style lang="less">
+  page {
+    height: 100%
+  }
+  .container {
+    height: 100%;
+  }
   .header {
     position: relative;
     padding: 30rpx 12rpx;

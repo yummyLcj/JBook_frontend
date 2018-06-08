@@ -207,15 +207,15 @@ export default class extends wepy.page {
         let month = Number.parseInt(item.time.slice(5, 7))
         if (counts[month]) {
           // counts[month].push(item)
-          counts[month].total += Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : -item.amountSum).toFixed(2))
-          counts[month].cost += Number.parseFloat((item.balanceType.toString() === '0' ? 0 : item.amountSum).toFixed(2))
-          counts[month].income += Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : 0).toFixed(2))
+          counts[month].total += Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : -item.amountSum))
+          counts[month].cost += Number.parseFloat((item.balanceType.toString() === '0' ? 0 : item.amountSum))
+          counts[month].income += Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : 0))
         } else {
           // counts[month] = [item]
           counts[month] = {
-            total: Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : -item.amountSum).toFixed(2)),
-            cost: Number.parseFloat(((item.balanceType.toString() === '0' ? 0 : item.amountSum).toFixed(2))),
-            income: Number.parseFloat(((item.balanceType.toString() === '0' ? item.amountSum : 0).toFixed(2)))
+            total: Number.parseFloat((item.balanceType.toString() === '0' ? item.amountSum : -item.amountSum)),
+            cost: Number.parseFloat(((item.balanceType.toString() === '0' ? 0 : item.amountSum))),
+            income: Number.parseFloat(((item.balanceType.toString() === '0' ? item.amountSum : 0)))
           }
         }
       })
@@ -243,9 +243,9 @@ export default class extends wepy.page {
         let tol = (counts[i] && counts[i].total) || 0
         let income = (counts[i] && counts[i].income) || 0
         let cost = (counts[i] && counts[i].cost) || 0
-        series[0].data.push(tol.toFixed(2))
-        series[1].data.push(income.toFixed(2))
-        series[2].data.push(cost.toFixed(2))
+        series[0].data.push(tol)
+        series[1].data.push(income)
+        series[2].data.push(cost)
         total[0] += income
         total[1] += cost
         total[2] += tol
@@ -254,6 +254,14 @@ export default class extends wepy.page {
       total[1] = total[1].toFixed(2)
       total[2] = total[2].toFixed(2)
       this.ec.option.series = series
+      for (let i = 1; i < 13; i++) {
+        const count = counts[i]
+        counts[i] = {
+          total: count.total.toFixed(2),
+          cost: count.cost.toFixed(2),
+          income: count.income.toFixed(2)
+        }
+      }
       this.counts = counts
       this.total = total
       this.$apply()
