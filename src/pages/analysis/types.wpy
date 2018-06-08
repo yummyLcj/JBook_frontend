@@ -19,7 +19,7 @@
     <view class="items">
       <repeat for="{{counts}}" key="index" index="index" item="item">
         <view class="cost-item">
-          <view class="iconfont icon-{{item.type.code}} type-icon"></view>
+          <view class="iconfont icon-{{item.type.code}} {{item.type.code}} type-icon"></view>
           <view class="count-info">
             <view class="name">{{item.type.name}}</view>
             <view class="count">{{item.ridCount}}笔</view>
@@ -87,7 +87,7 @@
     line-height: 80rpx;
     font-size: 44rpx;
     color: #FFF;
-    background-color: orange;
+    // background-color: orange;
     border-radius: 50%;
   }
   .count-info {

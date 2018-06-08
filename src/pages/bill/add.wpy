@@ -181,6 +181,16 @@
         record.date = data.time
         record.amount = data.amount
         record.remark = data.note
+        if (data.circleTime) {
+          this.circleTime = {
+            tem: '',
+            new: data.circleTime
+          }
+          this.circleType = {
+            tem: '',
+            new: data.circleType
+          }
+        }
         this.record = record
         const users = this.users
         users.forEach((user) => {
@@ -367,6 +377,7 @@
     .circle-picker {
       width: 750rpx;
       height: 400rpx;
+      text-align: center;
     }
     .top-btn {
       border-top: 1rpx solid #ddd;

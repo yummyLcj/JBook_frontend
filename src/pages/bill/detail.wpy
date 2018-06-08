@@ -46,6 +46,17 @@
           <text>{{record.editer.createdAt}}</text>
         </view>
       </view>
+      <block wx:if="{{!!record.circleTime}}">
+        <view class="info-mount">
+          <view class="info-each tal">
+            <text class="iconfont icon-date icon-border"></text>
+            <text class="mr10">循环时间</text>
+          </view>
+          <view class="info-each tar">
+            <text>{{record.circleTime}} {{record.circleType}}</text>
+          </view>
+        </view>
+      </block>
       <view class="info-mount">
         <view class="info-each tal">
           <text class="iconfont icon-book icon-border"></text>
@@ -157,7 +168,9 @@
             amount: data.amount,
             remark: data.note,
             creater: data.creater,
-            editer: data.editer
+            editer: data.editer,
+            circleTime: data.circleTime,
+            circleType: ['年', '月', '日'][data.circleType]
           }
           this.users = res.data.users
         })
