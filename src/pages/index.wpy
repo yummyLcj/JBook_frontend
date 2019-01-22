@@ -1,6 +1,7 @@
 <template>
   <view>
     <button open-type="getUserInfo" bindgetuserinfo="getuserinfo">登陆</button>
+    <text class="sd-icon sdnm-home-n"></text>
   </view>
 </template>
 

@@ -36,6 +36,7 @@ export default class extends wepy.app {
 
 <style lang="less">
   @import url('./font/iconfont.less');
+  @import url('./less/iconfont.less');
   @import url('./less/index.less');
   .fs42 {
     font-size: 42rpx;
